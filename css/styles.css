@@ -78,6 +78,21 @@ overflow: scroll;}}
   }
 }
 
+.tcheck {
+  border: 2px red solid;
+}
+
+.logoimg {
+  height: 13vh;
+}
+
+.upper-bg-image {
+  background-image: url("../images/test-bg.png");
+  background-position: center;
+  background-size: 100%;
+  filter: blur(0px);
+}
+
 @media (min-width: 0) and (max-width:576px) {}
 
 @media (min-width: 577px) and (max-width:768px) {}
