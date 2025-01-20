@@ -67,6 +67,12 @@ a:visited {
   }
 }
 
+.sticky-element {
+      position: -webkit-sticky; /* Для Safari */
+      position: sticky;
+      top: 10vh; /* Отступ от верхней части страницы */
+    }
+
 /* Общий контейнер для пагинации */
 .pagination {
   display: flex;
