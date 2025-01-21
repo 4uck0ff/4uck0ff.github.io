@@ -67,9 +67,82 @@ a:visited {
   }
 }
 
+/* Стили для увеличенного изображения */
+#full-size-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 9999;
+  display: none; /* Изначально скрыто */
+  max-width: 90%; /* Максимальная ширина */
+  max-height: 90%; /* Максимальная высота */
+  object-fit: contain; /* Подгоняет изображение по размеру */
+  background-color: rgba(0, 0, 0, 0.8); /* Полупрозрачный фон */
+  cursor: pointer; /* Курсор при наведении */
+}
+
+/* Класс для картинки, которая активируется */
+#full-size-image.active {
+  display: block; /* Показываем изображение при активации */
+}
+
+/* Стили для кнопки закрытия */
+#close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 10000;
+  padding: 5px;
+  border-radius: 50%; /* Сделаем кнопку круглой */
+  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон для кнопки */
+}
+
+#close-btn:hover {
+  color: #ff0000; /* При наведении меняем цвет */
+  background-color: rgba(0, 0, 0, 0.7); /* При наведении кнопка становится темнее */
+}
+
+
 .mainFont {
   font-family:Chanel;
   font-size:24px;
+}
+
+.imagesInsidePopUp {
+  max-height:200px;
+  max-width:200px;
+    transition:0.2s;
+}
+
+.imagesInsidePopUp:hover {
+  transform:scale(1.1);
+  transition:0.2s;
+}
+
+.popUpCont {
+  background-color: #ebebeb;
+    border-radius: 12px;
+    border: 2px solid #d1d1d1;
+    box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
+    width:800px;
+}
+
+.imagesPopupDescription {
+  padding-top:3vh;
+  font-family:Chanel;
+}
+
+.popupTitle {
+  font-family:Chanel;
+  text-align:center;
 }
 
 .schematicCont {
@@ -83,11 +156,22 @@ a:visited {
  border: 2px solid #d1d1d1;
  box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
    transition:0.2s;
+   cursor:pointer;
 }
 
 .schematicCont:hover {
-  transform:scale(1.03);
-  transition:0.3s;
+  border: 2px solid #d1d1d1;
+  box-shadow: inset 0px 0px 10px 5px rgba(0, 150, 100, 0.15);
+  transition:0.2s;
+
+}
+
+.schematicCont:active {
+  background-color:grey;
+  transform: scale(0.993);
+    box-shadow: inset 0px 0px 25px 7px rgba(0, 150, 100, 0.15);
+  transition:none;
+
 }
 
 .schematicImageCont {
@@ -103,6 +187,45 @@ a:visited {
 
 .schematicImage {
   padding:0;
+}
+
+.schematicTitle {
+  padding-left:4vh;
+  padding-top:1vh;
+  font-size:3vh;
+}
+
+.schematicName {
+  padding-left:4vh;
+  margin-top:-0.8vh;
+  font-size:2vh;
+}
+
+.schematicNumber {
+  padding-left:4vh;
+  font-size:2.7vh;
+}
+
+.schematicArticle {
+  margin-left:1.45vh;
+  margin-top:3vh;
+  font-size:2.8vh;
+}
+
+.schematicPrice {
+  font-size:3.5vh;
+  font-style:bold;
+}
+
+.schematicDate {
+  padding-left:4vh;
+  margin-top:3vh;
+  font-size:2.2vh;
+}
+
+.schematicTitleMain {
+  padding-left:3vh;
+  padding-top:2vh;
 }
 
 .sticky-element {
