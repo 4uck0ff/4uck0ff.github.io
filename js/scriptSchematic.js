@@ -433,48 +433,85 @@ document.getElementById('searchButton').addEventListener('click', searchSchemati
 document.getElementById('resetButton').addEventListener('click', resetSearch);
 
 document.addEventListener("DOMContentLoaded", function () {
-    const fullSizeImage = document.createElement('div'); // Создаем контейнер для изображения
-    fullSizeImage.id = 'full-size-container'; // Добавляем ID для контейнера
-    document.body.appendChild(fullSizeImage); // Вставляем его в body
+    const fullSizeImageContainer = document.createElement('div'); // Контейнер для изображения
+    fullSizeImageContainer.id = 'full-size-container';
+    document.body.appendChild(fullSizeImageContainer);
 
-    const img = document.createElement('img'); // Создаем сам элемент изображения
+    const img = document.createElement('img'); // Увеличенное изображение
     img.id = 'full-size-image';
-    fullSizeImage.appendChild(img); // Вставляем изображение в контейнер
+    fullSizeImageContainer.appendChild(img);
 
-    // Создаем кнопку для закрытия изображения
+    // Кнопка закрытия
     const closeButton = document.createElement('button');
     closeButton.id = 'close-btn';
-    closeButton.innerHTML = '&times;'; // Символ для крестика
-    fullSizeImage.appendChild(closeButton); // Добавляем кнопку в контейнер
+    closeButton.innerHTML = '&times;';
+    fullSizeImageContainer.appendChild(closeButton);
 
-    // Функция для добавления обработчиков кликов на изображения
+    let scale = 1; // Масштаб изображения
+    let isDragging = false; // Флаг перетаскивания
+    let startX, startY; // Начальные координаты мыши
+    let imgX = 0, imgY = 0; // Смещение изображения
+
+    // Добавление обработчиков кликов на изображения
     function attachClickHandlers() {
         const images = document.querySelectorAll('.gallery-item');
         images.forEach((image) => {
-            if (!image.dataset.processed) { // Проверяем, не был ли обработан элемент
-                image.dataset.processed = "true"; // Помечаем элемент как обработанный
+            if (!image.dataset.processed) {
+                image.dataset.processed = "true";
                 image.addEventListener('click', function () {
-                    if (fullSizeImage.classList.contains('active') && img.src === image.src) {
-                        fullSizeImage.classList.remove('active');
-                    } else {
-                        img.src = image.src; // Устанавливаем путь к изображению
-                        img.alt = image.alt; // Устанавливаем alt-текст
-                        fullSizeImage.classList.add('active');
-                    }
+                    img.src = image.src;
+                    img.alt = image.alt;
+                    scale = 1; // Сбрасываем масштаб
+                    img.style.transform = `translate(0px, 0px) scale(1)`;
+                    imgX = 0;
+                    imgY = 0;
+                    fullSizeImageContainer.classList.add('active');
                 });
             }
         });
     }
 
-    // Закрытие изображения при клике на кнопку
+    // Закрытие изображения
     closeButton.addEventListener('click', function () {
-        fullSizeImage.classList.remove('active');
+        fullSizeImageContainer.classList.remove('active');
     });
 
-    // Используем MutationObserver для отслеживания изменений в DOM
+    // Увеличение/уменьшение колесиком мыши
+    img.addEventListener('wheel', function (event) {
+        event.preventDefault();
+        const zoomIntensity = 0.1;
+        scale += event.deltaY < 0 ? zoomIntensity : -zoomIntensity;
+        scale = Math.min(Math.max(scale, 0.5), 3); // Ограничение масштаба
+        img.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
+    });
+
+    // Перетаскивание изображения
+    img.addEventListener('mousedown', function (event) {
+        isDragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+    });
+
+    document.addEventListener('mousemove', function (event) {
+        if (isDragging) {
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+            imgX += dx;
+            imgY += dy;
+            img.style.transform = `translate(${imgX}px, ${imgY}px) scale(${scale})`;
+            startX = event.clientX;
+            startY = event.clientY;
+        }
+    });
+
+    document.addEventListener('mouseup', function () {
+        isDragging = false;
+    });
+
+    // Отслеживание изменений DOM
     const observer = new MutationObserver(attachClickHandlers);
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Первый вызов для обработки уже существующих элементов
+    // Первый вызов для существующих элементов
     attachClickHandlers();
 });
