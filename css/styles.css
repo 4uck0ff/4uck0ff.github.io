@@ -110,6 +110,105 @@ a:visited {
   background-color: rgba(0, 0, 0, 0.7); /* При наведении кнопка становится темнее */
 }
 
+.inputArticle {
+  width:100%;
+  height: 5vh;
+  background-color:white;
+  color:black;
+  border:2px solid #ebebeb;
+   border-radius:25px;
+   box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
+   font-family:Chanel;
+   text-align:center;
+   font-size:24px;
+   align:center;
+}
+
+.inputArticle:hover {
+  box-shadow: inset 0px 0px 20px -6px rgba(0, 0, 0, 0.55);
+  transition:0.2s;
+  border:2px solid grey;
+}
+
+.inputEmail {
+  width:100%;
+  height: 5vh;
+  background-color:white;
+  color:black;
+  border:2px solid #ebebeb;
+   border-radius:25px;
+   box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
+   font-family:Chanel;
+   text-align:center;
+   font-size:24px;
+     transition:0.2s;
+}
+
+.inputEmail:hover {
+  box-shadow: inset 0px 0px 20px -6px rgba(0, 0, 0, 0.55);
+  transition:0.2s;
+  border:2px solid grey;
+}
+
+.inputPhone {
+  width:100%;
+  height: 5vh;
+  background-color:white;
+  color:black;
+  border:2px solid #ebebeb;
+   border-radius:25px;
+   box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
+   font-family:Chanel;
+   text-align:center;
+   font-size:24px;
+}
+
+.inputPhone:hover {
+  box-shadow: inset 0px 0px 20px -6px rgba(0, 0, 0, 0.55);
+  transition:0.2s;
+  border:2px solid grey;
+}
+
+.imagesPopupDescription {
+  padding-top:0 !important;
+}
+
+.popUpInputCont {
+  height:9vh;
+}
+
+.inputPopUpTextDescription {
+  font-family: Chanel;
+  font-size: 15px;
+}
+
+.popUpButton {
+  width:20vh;
+  height:5vh;
+  background-color:white;
+  color:grey;
+  border:2px solid #ebebeb;
+   border-radius:25px;
+   box-shadow: inset 0px 0px 10px -6px rgba(0, 0, 0, 0.25);
+   font-family:Chanel;
+   text-align:center;
+   font-size:20px;
+}
+
+.popUpButton:hover {
+ background-color:#ababab;
+ transition:0.2s;
+   border:2px solid grey;
+}
+
+.popUpButton:active {
+ background-color:white;
+ transform:scale(0.95);
+  transition:0.1s;
+}
+
+
+
  #searchInput {
    width:100%;
    height: 4vh;

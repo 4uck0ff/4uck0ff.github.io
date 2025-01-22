@@ -135,6 +135,38 @@ function renderSchematics() {
             <div class="row">
               <div class="col imagesPopupDescription">${description}</div>
             </div>
+            <div class="row popUpInputCont">
+              <div class="col-7 align-content-center imagesPopupDescription">
+               <input type="email" class="inputEmail" placeholder="example@email.com">
+              </div>
+              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                По указанной почте, будет происходить общение с дальнейшей отправкой файла
+              </div>
+            </div>
+            <div class="row popUpInputCont">
+              <div class="col-7 align-content-center text-center imagesPopupDescription">
+               <input type="text" class="inputArticle" placeholder="article" value="${article}">
+              </div>
+              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                Артикул детали (введён автоматически)
+              </div>
+            </div>
+            <div class="row popUpInputCont">
+              <div class="col-7 align-content-center imagesPopupDescription">
+               <input type="tel" input-type="tel" class="inputPhone" placeholder="+375XXXXXXXXX">
+              </div>
+              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                Нужен для обратной связи
+              </div>
+            </div>
+            <div class="row popUpInputCont">
+              <div class="col-7 align-content-center text-center imagesPopupDescription">
+               <button class="popUpButton" type="button" name="button">Отправить</button>
+              </div>
+              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                После отправки, к вам на почту придет письмо с дальнейшими инструкциями
+              </div>
+            </div>
           </div>
         </div>
       </div>
