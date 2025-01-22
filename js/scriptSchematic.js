@@ -431,43 +431,50 @@ function resetSearch() {
 document.addEventListener('DOMContentLoaded', loadExcelFile);
 document.getElementById('searchButton').addEventListener('click', searchSchematics);
 document.getElementById('resetButton').addEventListener('click', resetSearch);
+
 document.addEventListener("DOMContentLoaded", function () {
-      const images = document.querySelectorAll('.gallery-item'); // Все изображения
-      const fullSizeImage = document.createElement('img'); // Создадим элемент для увеличенного изображения
-      fullSizeImage.id = 'full-size-image'; // Добавим ID для этого элемента
-      document.body.appendChild(fullSizeImage); // Вставим его в body
+    const fullSizeImage = document.createElement('div'); // Создаем контейнер для изображения
+    fullSizeImage.id = 'full-size-container'; // Добавляем ID для контейнера
+    document.body.appendChild(fullSizeImage); // Вставляем его в body
 
-      // Создаем кнопку для закрытия изображения
-      const closeButton = document.createElement('button');
-      closeButton.id = 'close-btn';
-      closeButton.innerHTML = '&times;'; // Символ для крестика
-      fullSizeImage.appendChild(closeButton); // Добавляем кнопку внутрь увеличенного изображения
+    const img = document.createElement('img'); // Создаем сам элемент изображения
+    img.id = 'full-size-image';
+    fullSizeImage.appendChild(img); // Вставляем изображение в контейнер
 
-      images.forEach((image) => {
-          image.addEventListener('click', function () {
-              // Проверяем, если изображение уже открыто
-              if (fullSizeImage.classList.contains('active') && fullSizeImage.src === image.src) {
-                  // Закрываем увеличенное изображение
-                  fullSizeImage.classList.remove('active');
-              } else {
-                  // Открываем изображение в полный размер
-                  fullSizeImage.src = image.src; // Устанавливаем путь к изображению
-                  fullSizeImage.alt = image.alt; // Устанавливаем alt-текст
-                  fullSizeImage.classList.add('active'); // Делаем изображение видимым
-              }
-          });
-      });
+    // Создаем кнопку для закрытия изображения
+    const closeButton = document.createElement('button');
+    closeButton.id = 'close-btn';
+    closeButton.innerHTML = '&times;'; // Символ для крестика
+    fullSizeImage.appendChild(closeButton); // Добавляем кнопку в контейнер
 
-      // Закрытие изображения при клике на него
-      fullSizeImage.addEventListener('click', function (event) {
-          // Не закрывать изображение при клике на саму картинку
-          if (event.target === fullSizeImage) {
-              fullSizeImage.classList.remove('active');
-          }
-      });
+    // Функция для добавления обработчиков кликов на изображения
+    function attachClickHandlers() {
+        const images = document.querySelectorAll('.gallery-item');
+        images.forEach((image) => {
+            if (!image.dataset.processed) { // Проверяем, не был ли обработан элемент
+                image.dataset.processed = "true"; // Помечаем элемент как обработанный
+                image.addEventListener('click', function () {
+                    if (fullSizeImage.classList.contains('active') && img.src === image.src) {
+                        fullSizeImage.classList.remove('active');
+                    } else {
+                        img.src = image.src; // Устанавливаем путь к изображению
+                        img.alt = image.alt; // Устанавливаем alt-текст
+                        fullSizeImage.classList.add('active');
+                    }
+                });
+            }
+        });
+    }
 
-      // Закрытие изображения при клике на кнопку (крестик)
-      closeButton.addEventListener('click', function () {
-          fullSizeImage.classList.remove('active');
-      });
-  });
+    // Закрытие изображения при клике на кнопку
+    closeButton.addEventListener('click', function () {
+        fullSizeImage.classList.remove('active');
+    });
+
+    // Используем MutationObserver для отслеживания изменений в DOM
+    const observer = new MutationObserver(attachClickHandlers);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Первый вызов для обработки уже существующих элементов
+    attachClickHandlers();
+});
