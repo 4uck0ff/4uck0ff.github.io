@@ -54,11 +54,15 @@ async function loadExcelFile() {
 
     renderSchematics(); // Отображаем схемы
     renderPagination(); // Отображаем селектор страниц
+
+    // Добавляем вызов populateFilters после успешной загрузки данных
+    populateFilters();
   } catch (error) {
     console.error('Ошибка при загрузке или обработке файла:', error);
     document.getElementById('schematicAdd').textContent = 'Ошибка при загрузке файла.';
   }
 }
+
 
 // Функция для отображения схем текущей страницы
 function renderSchematics() {
@@ -210,12 +214,14 @@ function populateFilters() {
   modelFilter.innerHTML = '<option value="">Все модели</option>';
   yearFilter.innerHTML = '<option value="">Все года</option>';
 
-  // Извлекаем уникальные марки и годы из массива схем
-  const uniqueBrands = [...new Set(schematics.map((s) => s.brand).filter((brand) => brand !== ''))];
-  const uniqueYears = [...new Set(schematics.map((s) => s.year).filter((year) => year !== ''))];
+  // Проверяем наличие данных в массиве schematics
+  if (!Array.isArray(schematics) || schematics.length === 0) {
+    console.error('Массив schematics пуст или не определен.');
+    return;
+  }
 
-  // Выводим уникальные марки и года во всплывающее окно
-  showAlertWithData(uniqueBrands, uniqueYears);
+  // Извлекаем уникальные марки из массива схем
+  const uniqueBrands = [...new Set(schematics.map((s) => s.brand).filter((brand) => brand))].sort();
 
   // Добавляем марки в фильтр
   uniqueBrands.forEach((brand) => {
@@ -225,25 +231,18 @@ function populateFilters() {
     brandFilter.appendChild(option);
   });
 
-  // Добавляем года в фильтр
-  uniqueYears.forEach((year) => {
-    const option = document.createElement('option');
-    option.value = year;
-    option.textContent = year;
-    yearFilter.appendChild(option);
-  });
-
   // Слушатель для изменения бренда
   brandFilter.addEventListener('change', () => {
     const selectedBrand = brandFilter.value;
 
     // Фильтруем модели по выбранному бренду
-    const filteredModels = selectedBrand
-      ? schematics.filter((s) => s.brand === selectedBrand).map((s) => s.model)
-      : [];
+    const filteredModels = schematics
+      .filter((s) => selectedBrand === '' || s.brand === selectedBrand)
+      .map((s) => s.model)
+      .filter((model) => model);
 
     // Получаем уникальные модели
-    const uniqueModels = [...new Set(filteredModels)];
+    const uniqueModels = [...new Set(filteredModels)].sort();
 
     // Добавляем модели в фильтр
     modelFilter.innerHTML = '<option value="">Все модели</option>';
@@ -256,20 +255,44 @@ function populateFilters() {
 
     // Ожидаем, что если моделей нет, нужно заблокировать фильтр модели
     modelFilter.disabled = uniqueModels.length === 0;
+
+    // Обновляем список годов при выборе модели
+    updateYearFilter(selectedBrand, modelFilter.value);
+  });
+
+  // Слушатель для изменения модели
+  modelFilter.addEventListener('change', () => {
+    updateYearFilter(brandFilter.value, modelFilter.value);
+  });
+
+  // Начальная инициализация года
+  updateYearFilter('', '');
+}
+
+function updateYearFilter(selectedBrand, selectedModel) {
+  const yearFilter = document.getElementById('yearFilter');
+
+  // Фильтруем годы по выбранным марке и модели
+  const filteredYears = schematics
+    .filter((s) =>
+      (selectedBrand === '' || s.brand === selectedBrand) &&
+      (selectedModel === '' || s.model === selectedModel)
+    )
+    .map((s) => s.year)
+    .filter((year) => year);
+
+  // Получаем уникальные годы
+  const uniqueYears = [...new Set(filteredYears)].sort((a, b) => a - b);
+
+  // Добавляем годы в фильтр
+  yearFilter.innerHTML = '<option value="">Все года</option>';
+  uniqueYears.forEach((year) => {
+    const option = document.createElement('option');
+    option.value = year;
+    option.textContent = year;
+    yearFilter.appendChild(option);
   });
 }
-
-// Функция для отображения информации во всплывающем окне
-function showAlertWithData(brands, years) {
-  const brandsText = brands.length > 0 ? `Уникальные марки:\n${brands.join('\n')}` : 'Нет марок';
-  const yearsText = years.length > 0 ? `Уникальные года:\n${years.join('\n')}` : 'Нет годов';
-
-  // Выводим информацию в стандартное всплывающее окно браузера
-  alert(`${brandsText}\n\n${yearsText}`);
-}
-
-
-
 
 function searchSchematics() {
   const titleQuery = document.getElementById('searchSchematic').value.toLowerCase();
@@ -283,7 +306,9 @@ function searchSchematics() {
     const matchesBrand = brandQuery === '' || schematic.brand === brandQuery;
     const matchesModel = modelQuery === '' || schematic.model === modelQuery;
     const matchesYear = yearQuery === '' || schematic.year.toString() === yearQuery;
-    const matchesPartNumber = partNumberQuery === '' || schematic.partNumber.toLowerCase().includes(partNumberQuery);
+    const matchesPartNumber =
+      partNumberQuery === '' ||
+      (schematic.partNumber && schematic.partNumber.toString().toLowerCase().includes(partNumberQuery));
 
     return matchesTitle && matchesBrand && matchesModel && matchesYear && matchesPartNumber;
   });
@@ -333,6 +358,11 @@ function resetSearch() {
   renderSchematics();
   renderPagination();
 }
+
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', loadExcelFile);
 document.getElementById('searchButton').addEventListener('click', searchSchematics);
