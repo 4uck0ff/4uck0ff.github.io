@@ -60,11 +60,19 @@
     <div class="row" style="height:4vh;">
     </div>
     <div class="row">
-      <div class="col-3 sticky-element find-container">
+      <div class="col-3 sticky-element find-container" style="height:20vh;">
         <div id="searchNews" class="search-container">
-          <input type="text" id="searchInput" placeholder="Введите слово для поиска..." />
-          <button id="searchButton">Поиск</button>
-          <button id="resetButton">Сброс</button>
+          <div class="row">
+            <input type="text" id="searchInput" placeholder="Введите слово для поиска..." />
+          </div>
+          <div class="row seatchButtonsCont justify-content-evenly">
+            <div class="col-6 text-center">
+              <button id="searchButton">Поиск</button>
+            </div>
+            <div class="col-6 text-center ">
+              <button id="resetButton">Сбросить</button>
+            </div>
+          </div>
           <div id="searchnoresult"></div>
         </div>
       </div>

@@ -102,9 +102,9 @@ function renderSchematics() {
           <div class="row schematicTitle">${title}</div>
           <div class="row schematicName">${brand} / ${model} / ${year}</div>
           <div class="row schematicNumber">${partNumber}</div>
-          <div class="row schematicArticle">
-            <div class="col-8">${article}</div>
-            <div class="col-4 schematicPrice">${price}</div>
+          <div class="row">
+            <div class="col-8 schematicArticle">Артикул ${article}</div>
+            <div class="col-4 schematicPrice">${price} BYN</div>
           </div>
           <div class="row schematicDate">${date}</div>
         </div>
@@ -114,7 +114,7 @@ function renderSchematics() {
         <div class="popup-gallery">
           <div class="popUpCont container">
             <div class="row">
-              <h2 class="popupTitle">Галерея изображений</h2>
+              <h2 class="schematicTitle">${title} ${brand} / ${model} / ${year}</h2>
             </div>
             <div class="row">
               ${images
@@ -126,6 +126,11 @@ function renderSchematics() {
                   `
                 )
                 .join('')}
+            </div>
+            <div class="row schematicNumber">Номер: ${partNumber}</div>
+            <div class="row">
+              <div class="col-8 schematicArticle">Артикул: ${article}</div>
+              <div class="col-4 schematicPrice">${price} BYN</div>
             </div>
             <div class="row">
               <div class="col imagesPopupDescription">${description}</div>
@@ -154,43 +159,70 @@ function initializePopups() {
 
 // Функция для отображения селектора страниц
 function renderPagination() {
+  // Получаем контейнеры для пагинации
   const paginationTop = document.getElementById('paginationTop');
   const paginationBottom = document.getElementById('paginationBottom');
   paginationTop.innerHTML = '';
   paginationBottom.innerHTML = '';
 
+  // Вычисляем общее количество страниц
   const schematicsToRender = filteredSchematics.length > 0 ? filteredSchematics : schematics;
   const totalPages = Math.ceil(schematicsToRender.length / schematicsPerPage);
 
-  if (totalPages <= 1) return;
+  if (totalPages <= 1) return; // Если страниц <= 1, ничего не отображаем
 
+  // Функция для создания селектора страниц
   function createPaginationControls() {
     const paginationHTML = document.createElement('div');
-    paginationHTML.classList.add('pagination');
+    paginationHTML.classList.add('pagination'); // Добавляем общий класс для контейнера
 
+    // Кнопка "Назад"
     const prevButton = document.createElement('button');
     prevButton.textContent = '<';
+    prevButton.classList.add('pagination-button', 'pagination-prev'); // Классы для кнопки
     prevButton.disabled = currentPage === 1;
+    if (prevButton.disabled) prevButton.classList.add('disabled'); // Класс для отключённой кнопки
     prevButton.addEventListener('click', () => changePage(currentPage - 1));
     paginationHTML.appendChild(prevButton);
 
+    // Номера страниц
     for (let i = 1; i <= totalPages; i++) {
-      const pageButton = document.createElement('button');
-      pageButton.textContent = i;
-      if (i === currentPage) pageButton.classList.add('active');
-      pageButton.addEventListener('click', () => changePage(i));
-      paginationHTML.appendChild(pageButton);
+      if (
+        i === 1 || // Первая страница
+        i === totalPages || // Последняя страница
+        (i >= currentPage - 2 && i <= currentPage + 2) // Текущая страница и соседние
+      ) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.classList.add('pagination-button', 'pagination-page'); // Классы для номера страницы
+        if (i === currentPage) pageButton.classList.add('active'); // Класс для активной страницы
+        pageButton.disabled = i === currentPage;
+        pageButton.addEventListener('click', () => changePage(i));
+        paginationHTML.appendChild(pageButton);
+      } else if (
+        (i === currentPage - 3 && currentPage > 4) || // Многоточие перед
+        (i === currentPage + 3 && currentPage < totalPages - 3) // Многоточие после
+      ) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.classList.add('pagination-ellipsis'); // Класс для многоточия
+        paginationHTML.appendChild(ellipsis);
+      }
     }
 
+    // Кнопка "Вперёд"
     const nextButton = document.createElement('button');
     nextButton.textContent = '>';
+    nextButton.classList.add('pagination-button', 'pagination-next'); // Классы для кнопки
     nextButton.disabled = currentPage === totalPages;
+    if (nextButton.disabled) nextButton.classList.add('disabled'); // Класс для отключённой кнопки
     nextButton.addEventListener('click', () => changePage(currentPage + 1));
     paginationHTML.appendChild(nextButton);
 
     return paginationHTML;
   }
 
+  // Вставляем созданный селектор в оба контейнера
   paginationTop.appendChild(createPaginationControls());
   paginationBottom.appendChild(createPaginationControls());
 }
@@ -318,9 +350,8 @@ function searchSchematics() {
   renderPagination(); // Перерисовываем пагинацию
 
   // Если нет отфильтрованных схем, показываем сообщение
-  const noSearchResult = document.getElementById('nosearchresult');
+  const noSearchResult = document.getElementById('noSearchResultS');
   if (filteredSchematics.length === 0) {
-    noSearchResult.textContent = 'Ничего не найдено по вашему запросу';
     noSearchResult.style.display = 'block'; // Показываем сообщение
   } else {
     noSearchResult.style.display = 'none'; // Скрываем сообщение
@@ -338,6 +369,7 @@ function initializeSearch() {
     document.getElementById('modelFilter').value = '';
     document.getElementById('yearFilter').value = '';
     document.getElementById('partNumberFilter').value = '';
+    document.getElementById('noSearchResultS').style.display = 'none';
 
     filteredSchematics = [];
     currentPage = 1;
@@ -367,11 +399,7 @@ function resetSearch() {
 document.addEventListener('DOMContentLoaded', loadExcelFile);
 document.getElementById('searchButton').addEventListener('click', searchSchematics);
 document.getElementById('resetButton').addEventListener('click', resetSearch);
-
-
-
-
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
       const images = document.querySelectorAll('.gallery-item'); // Все изображения
       const fullSizeImage = document.createElement('img'); // Создадим элемент для увеличенного изображения
       fullSizeImage.id = 'full-size-image'; // Добавим ID для этого элемента
