@@ -62,10 +62,10 @@ function renderArticles() {
           <span>${date}</span>
         </div>
         <div class="row newsText">
-          <div class="col-9">
+          <div class="col-md-9 col-xs-12">
             <span class="newsText"><p>${content}</p></span>
           </div>
-          <div class="col-3 text-center justify-content-center align-content-center">
+          <div class="col-md-3 col-xs-12 text-center justify-content-center align-content-center">
             <img class="newsImage" src="../${imagePath}" alt="${title}">
           </div>
         </div>

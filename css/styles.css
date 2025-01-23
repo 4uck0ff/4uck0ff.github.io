@@ -557,6 +557,7 @@ a:visited {
       position: -webkit-sticky; /* Для Safari */
       position: sticky;
       top: 10vh; /* Отступ от верхней части страницы */
+      height: 20vh !important;
     }
 
 /* Общий контейнер для пагинации */
@@ -660,31 +661,7 @@ a:visited {
   display: none;
 }
 
-@media only screen and (max-width: 512px) {
-  body {
-    -webkit-overflow-scrolling: touch;
-    overflow: scroll;
-  }
-}
 
-@media (min-width: 0) and (max-width:1266px) {
-  .secondslidedisplaynone {
-    display: none;
-  }
-
-  .secondslidedisplaytrue {
-    display: block;
-  }
-
-  .hideWidth {
-    display: none !important;
-  }
-
-  .bgSelection {
-    background-color: #121212;
-    height: 143vh;
-  }
-}
 
 .tcheck {
   border: 2px red solid;
@@ -763,7 +740,92 @@ a:visited {
   transition: 0.1s;
 }
 
-@media (min-width: 0) and (max-width:576px) {}
+.mfp-close {
+  right:24% !important;
+  background-color: white !important;
+  border-radius: 25px;
+}
+
+@media only screen and (max-width: 512px) {
+  body {
+    -webkit-overflow-scrolling: touch;
+    overflow: scroll;
+  }
+}
+
+@media (min-width: 0) and (max-width:576px) {
+  .upper-bg-image {
+    height: 13vh;
+  }
+
+  .logoimg {
+    height: 6vh;
+    margin: 0;
+  }
+
+  .bg-cont-1 {
+   width: 100%;
+   padding: 0;
+  }
+
+  .bg-cont-2 {
+    width: 100%;
+    padding: 0;
+  }
+
+  .logoFont {
+    font-size:24px;
+
+  }
+
+  .upper-menu-row-button {
+    font-size:16px;
+    width: 33%;
+    padding-bottom:1vh;
+    padding-top:1vh;
+  }
+
+  .upper-menu-row-logo {
+    width: 33%;
+  }
+
+  .upper-menu-row {
+    box-shadow: 0px 14px 28px 1px rgba(0,0,0,0.2);
+  }
+
+  .sticky-element {
+        position: -webkit-static; /* Для Safari */
+        position: static;
+        top: 10vh; /* Отступ от верхней части страницы */
+        margin-bottom:10px;
+        height:10vh;
+      }
+
+      .sticky-element-2 {
+            position: -webkit-static; /* Для Safari */
+            position: static;
+            top: 10vh; /* Отступ от верхней части страницы */
+            margin-bottom:10px;
+            height:20vh;
+          }
+
+  .newsTitle {
+    font-size:28px;
+  }
+
+  .newsText {
+   text-align: justify;
+   padding-left: 2vh;
+  }
+
+  .content-container {
+    border-radius: 0;
+  }
+
+  .find-container {
+    height: 20vh !important;
+  }
+}
 
 @media (min-width: 577px) and (max-width:768px) {}
 
