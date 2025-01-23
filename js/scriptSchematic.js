@@ -93,18 +93,21 @@ function renderSchematics() {
     // Карточка схемы
     const schematicHTML = `
       <div class="row schematicCont open-popup" data-popup-id="${popupId}">
-        <div class="col-3">
+        <div class="col-md-3 col-xs-1 imageXS">
           <div class="row schematicImageCont">
             <img class="schematicImage" src="./${images[0]}" alt="${title}">
           </div>
         </div>
-        <div class="col-9 mainFont">
+        <div class="col-xs-5 priceXs text-center align-content-center">
+          ${price} BYN
+        </div>
+        <div class="col-md-9 col-xs-12 mainFont">
           <div class="row schematicTitle">${title}</div>
           <div class="row schematicName">${brand} / ${model} / ${year}</div>
           <div class="row schematicNumber">${partNumber}</div>
           <div class="row">
-            <div class="col-8 schematicArticle">Артикул ${article}</div>
-            <div class="col-4 schematicPrice">${price} BYN</div>
+            <div class="col-8  schematicArticle">Артикул ${article}</div>
+            <div class="col-md-4 col-xs-12  schematicPrice">${price} BYN</div>
           </div>
           <div class="row schematicDate">${date}</div>
         </div>
@@ -136,35 +139,35 @@ function renderSchematics() {
               <div class="col imagesPopupDescription">${description}</div>
             </div>
             <div class="row popUpInputCont">
-              <div class="col-7 align-content-center imagesPopupDescription">
+              <div class="col-md-7 col-xs-12 align-content-center imagesPopupDescription">
                <input type="email" class="inputEmail" placeholder="example@email.com">
               </div>
-              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
-                По указанной почте, будет происходить общение с дальнейшей отправкой файла
+              <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                Ваша электронная почта
               </div>
             </div>
             <div class="row popUpInputCont">
-              <div class="col-7 align-content-center text-center imagesPopupDescription">
+              <div class="col-md-7 col-xs-12 align-content-center text-center imagesPopupDescription">
                <input type="text" class="inputArticle" placeholder="article" value="${article}">
               </div>
-              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+              <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 Артикул детали (введён автоматически)
               </div>
             </div>
             <div class="row popUpInputCont">
-              <div class="col-7 align-content-center imagesPopupDescription">
+              <div class="col-md-7 col-xs-12 align-content-center imagesPopupDescription">
                <input type="tel" input-type="tel" class="inputPhone" placeholder="+375XXXXXXXXX">
               </div>
-              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+              <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 Нужен для обратной связи
               </div>
             </div>
             <div class="row popUpInputCont">
-              <div class="col-7 align-content-center text-center imagesPopupDescription">
+              <div class="col-md-7 col-xs-12 align-content-center text-center imagesPopupDescription">
                <button class="popUpButton" type="button" name="button">Отправить</button>
               </div>
-              <div class="col-4 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
-                После отправки, к вам на почту придет письмо с дальнейшими инструкциями
+              <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
+                После отправки, к Вам на почту придет письмо с дальнейшими инструкциями
               </div>
             </div>
           </div>

@@ -44,7 +44,7 @@
         <div class="col-md-2 col-xs-3 text-center align-content-center upper-menu-row-logo">
           <a href="index.html"><span style="color:black" class=" text-center align-middle logoFont">ReTun</span></a>
         </div>
-        <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+        <div style="transform: rotate(0);color:black;text-decoration:underline;text-decoration-thickness:2.1px;" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
           <a href="javascript:setTimeout(()=>{window.location = 'schematic.html' },200);" class="stretched-link"> Шаблон</a>
         </div>
         <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
@@ -76,20 +76,20 @@
                 <input type="text" id="searchSchematic" placeholder="Введите название схемы">
               </div>
             </div>
-            <div class="row justify-content-evenly">
-              <div class="col-xl-4 col-md-6 col-xs-4">
+            <div class="row searchMenuRow justify-content-evenly">
+              <div class="searchMenuCont text-center col-xl-4 col-md-6 col-xs-4">
                 <!-- Фильтр по марке -->
                 <select id="brandFilter">
                   <option value="">Все марки</option>
                 </select>
               </div>
-              <div class="col-xl-4 col-md-6 col-xs-4">
+              <div class="searchMenuCont text-center col-xl-4 col-md-6 col-xs-4">
                 <!-- Фильтр по модели -->
                 <select id="modelFilter" disabled>
                   <option value="">Все модели</option>
                 </select>
               </div>
-              <div class="col-xl-4 col-md-6 col-xs-4">
+              <div class="searchMenuCont text-center col-xl-4 col-md-6 col-xs-4">
                 <!-- Фильтр по году -->
                 <select id="yearFilter">
                   <option value="">Все года</option>
@@ -97,7 +97,7 @@
               </div>
             </div>
             <div class="row">
-              <div class="col partNumberCont">
+              <div class="col partNumberCont text-center">
                 <!-- Поле для ввода номера детали -->
                 <input type="text" id="partNumberFilter" placeholder="Введите номер детали">
               </div>
@@ -115,7 +115,7 @@
           </div>
           </div>
           <div id="nosearchresult" class="row align-content-center" style="padding-top:5vh;">
-            <div id="noSearchResultS" class="col">Ничего не найдено по вашему запросу.</div>
+            <div id="noSearchResultS" class="col ">Ничего не найдено по вашему запросу.</div>
           </div>
 
 

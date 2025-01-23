@@ -67,6 +67,7 @@ a:visited {
   }
 }
 
+
 /* Контейнер для увеличенного изображения */
 #full-size-container {
     display: none;
@@ -101,13 +102,13 @@ a:visited {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #fff;
+    background: #ff7878;
     color: #000;
     border: none;
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
-    padding: 5px 10px;
+    padding: -15px -10px;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
@@ -669,13 +670,23 @@ a:visited {
 
 .logoimg {
   height: 13vh;
-  filter: drop-shadow(0px 0px 7px #222);
+  filter: drop-shadow(0px 0px 3px #222);
+    transition:0.3s;
+}
+
+.logoimg:hover {
+  transform:scale(1.05);
+  transition:0.3s;
 }
 
 .upper-bg-image {
-  background-color: grey;
+  background-image:url('../images/bg1.png');
   height: 19vh;
+  background-size:auto;
+  background-origin:padding-box;
+  background-position: 25% 85%;
 }
+
 
 .bg-cont-1 {
   background-image: url("../images/test-bg2-svg.svg");
@@ -740,6 +751,10 @@ a:visited {
   transition: 0.1s;
 }
 
+.priceXs {
+  display:none;
+}
+
 .mfp-close {
   right:24% !important;
   background-color: white !important;
@@ -801,13 +816,17 @@ a:visited {
         height:10vh;
       }
 
-      .sticky-element-2 {
+  .sticky-element-2 {
             position: -webkit-static; /* Для Safari */
             position: static;
             top: 10vh; /* Отступ от верхней части страницы */
-            margin-bottom:10px;
-            height:20vh;
+            margin-bottom:100px;
+            height:30vh !important;
           }
+
+   #filter {
+
+   }
 
   .newsTitle {
     font-size:28px;
@@ -823,8 +842,145 @@ a:visited {
   }
 
   .find-container {
-    height: 20vh !important;
+    height: 30vh;
   }
+
+  .searchMenuCont {
+    width: 33%;
+  }
+
+  #noSearchResultS {
+    text-align: center;
+    width: 90%;
+    font-size:18px;
+    color:red;
+  }
+
+  #nosearchresult {
+   width: 90%;
+   padding-left:15%;
+  }
+
+  .searchSchematicCont {
+
+  }
+
+  #searchSchematic {
+    width: 90%;
+  }
+
+  #partNumberFilter {
+    width: 90%;
+  }
+
+  #searchSchematic:focus {
+    width: 90%;
+  }
+
+  #partNumberFilter:focus {
+    width: 90%;
+  }
+
+  .searchMenuCont {
+    padding:0;
+  }
+
+  .searchMenuRow {
+    width: 90%;
+    padding-left:10%;
+  }
+
+  .schematicImageCont {
+    width:15vh;
+    height:15vh;
+    overflow:hidden;
+    margin-left:2vh;
+    z-index:10;
+    margin-top:-3vh;
+    background-color:white;
+    outline:7px white solid;
+  }
+
+  .schematicTitle {
+    font-size:22px;
+  }
+
+  .schematicNumber {
+    font-size: 18px;
+  }
+
+  .schematicArticle {
+    margin-top: 0;
+    font-size:18px;
+    display: none;
+  }
+
+  .schematicPrice {
+    margin-top: 0;
+    font-size:22px;
+    display: none;
+  }
+
+  .priceXs {
+    display: block;
+    width: 17vh;
+    font-family: Chanel;
+    font-size:3vh;
+  }
+
+  .imageXS {
+    width: 180px;
+  }
+
+  .popUpCont {
+    width: 100%;
+  }
+
+  .imagesInsidePopUp {
+    max-height: 10vh;
+  }
+
+  .mfp-close {
+    vertical-align: text-top !important;
+    left:5% !important;
+    top:-10% !important;
+    background-color: #ff7878 !important;
+    color:white !important;
+    border-radius:50px;
+    width: 40px !important;
+    height: 40px !important;
+    font-size:30px !important;
+  }
+
+  .imagesPopupDescription {
+    margin-left: 0 !important;
+  }
+
+  .popUpInputCont {
+    margin-bottom: 1vh;
+    height: 10vh;
+  }
+
+  .inputPopUpTextDescription {
+    text-align:center;
+  }
+
+  .imagesInsidePopUp {
+    border-radius: 10px;
+  }
+
+  .schematicNumber {
+    display:none;
+  }
+
+  .popUpButton {
+    background-color: #7da884;
+    color:white;
+  }
+
+
+
+
 }
 
 @media (min-width: 577px) and (max-width:768px) {}
