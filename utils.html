@@ -7,73 +7,95 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/animate.css">
-  <link href="css/styles.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="css/fullpage.css" />
+  <link rel="stylesheet" href="css/styles.css?nocache=<?= time() ?>">
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-  <script type="text/javascript" src="js/fullpage.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/wow.min.js"></script>
   <script>
     new WOW().init();
   </script>
   <script>
     var sound = new Audio('sound/click.mp3');
-</script>
+  </script>
 </head>
-<div class="container-fluid bg-cont-1">
-  <div class="container bg-cont-2 align-middle">
-    <div class="row justify-content-center align-middle upper-bg-image">
+
+<body>
+  <div class="container-fluid bg-cont-1" style="height:100vh">
+    <div class="container bg-cont-2 align-middle">
+      <div class="row justify-content-center align-middle upper-bg-image">
         <div class="col-5">
 
         </div>
         <div class="col-2 align-self-center text-center">
-             <img class ="logoimg" src="images/R.png" alt="">
+          <img class="logoimg" src="images/R.png" alt="">
         </div>
         <div class="col-5">
 
         </div>
-    </div>
-    <div class="row upper-menu-row sticky-top" >
-      <div class="col-2 text-center align-middle ">
-        <a href="index.html"><span style="color:black" class=" text-center align-middle logoFont">ReTun</span></a>
       </div>
-      <div style="transform: rotate(0);" onclick="sound.play()" class="col-2  align-content-center text-center upper-menu-row-button">
-         <a href="javascript:setTimeout(()=>{window.location = 'schematic.html' },200);" class="stretched-link">  Шаблон</a>
+      <div class="row upper-menu-row sticky-top">
+        <div class="col-md-2 col-xs-3 text-center align-content-center upper-menu-row-logo">
+          <a href="index.html"><span style="color:black" class=" text-center align-middle logoFont">ReTun</span></a>
+        </div>
+        <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+          <a href="javascript:setTimeout(()=>{window.location = 'schematic.html' },200);" class="stretched-link"> Шаблон</a>
+        </div>
+        <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+          <a href="javascript:setTimeout(()=>{window.location = 'models.html' },200);" class="stretched-link"> 3D модель</a>
+        </div>
+        <div style="transform: rotate(0);color:black;text-decoration:underline;text-decoration-thickness:2.1px;" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+          <a href="javascript:setTimeout(()=>{window.location = 'utils.html' },200);" class="stretched-link"> Наши услуги</a>
+        </div>
+        <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+          <a href="javascript:setTimeout(()=>{window.location = 'contacts.html' },200);" class="stretched-link"> Контакты</a>
+        </div>
+        <div style="transform: rotate(0);" onclick="sound.play()" class="col-md-2  col-xs-3  align-content-center text-center upper-menu-row-button">
+          <a href="javascript:setTimeout(()=>{window.location = 'about.html' },200);" class="stretched-link"> О нас</a>
+        </div>
       </div>
-      <div style="transform: rotate(0);" onclick="sound.play()" class="col-2  align-content-center text-center upper-menu-row-button">
-        <a href="javascript:setTimeout(()=>{window.location = 'models.html' },200);" class="stretched-link"> 3D модель</a>
+      <div class="row" style="height:4vh;">
       </div>
-      <div style="transform: rotate(0);color:black;text-decoration:underline;text-decoration-thickness:2.1px;" onclick="sound.play()" class="col-2  align-content-center text-center upper-menu-row-button">
-        <a href="javascript:setTimeout(()=>{window.location = 'utils.html' },200);" class="stretched-link"> Наши услуги</a>
-      </div>
-      <div style="transform: rotate(0);" onclick="sound.play()" class="col-2  align-content-center text-center upper-menu-row-button">
-        <a href="javascript:setTimeout(()=>{window.location = 'contacts.html' },200);" class="stretched-link"> Контакты</a>
-      </div>
-      <div style="transform: rotate(0);" onclick="sound.play()" class="col-2  align-content-center text-center upper-menu-row-button">
-        <a href="javascript:setTimeout(()=>{window.location = 'about.html' },200);" class="stretched-link"> О нас</a>
-      </div>
-    </div>
-  <div class="row" style="height:4vh;">
-  </div>
-  <div class="row">
-    <div class="col-3 find-container">
-
-    </div>
-    <div class="col-9">
       <div class="row">
-        <div class="col content-container">
 
+        <div class="col-md-12 col-xs-12">
+
+          <div class="row">
+            <div class="col content-container">
+              <div class="row">
+                <div class="col mainFont schematicTitleMain">
+                  Какой-то там текст про услуги или что-то около того
+                </div>
+              </div>
+              <div class="row">
+                <div id="paginationTop" class="pagination">
+                </div>
+              </div>
+              <div id="schematicAdd" class="row" style="padding-left:1.4vh;margin-right:4vh;">
+
+              </div>
+              <div class="row">
+                <div id="paginationBottom" class="pagination">
+                </div>
+              </div>
+
+
+
+
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  </div>
-</div>
-<body>
 
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
