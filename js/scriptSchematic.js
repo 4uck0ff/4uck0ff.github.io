@@ -138,9 +138,10 @@ function renderSchematics() {
             <div class="row">
               <div class="col imagesPopupDescription">${description}</div>
             </div>
+            <form class="contact-form" method="POST" action="send.php">
             <div class="row popUpInputCont">
               <div class="col-md-7 col-xs-12 align-content-center imagesPopupDescription">
-               <input type="email" class="inputEmail" placeholder="example@email.com">
+               <input type="email" name="email" class="inputEmail" placeholder="example@email.com" required>
               </div>
               <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 Ваша электронная почта
@@ -148,7 +149,7 @@ function renderSchematics() {
             </div>
             <div class="row popUpInputCont">
               <div class="col-md-7 col-xs-12 align-content-center text-center imagesPopupDescription">
-               <input type="text" class="inputArticle" placeholder="article" value="${article}">
+               <input type="text" name="article" class="inputArticle" placeholder="article" value="${article}" required>
               </div>
               <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 Артикул детали (введён автоматически)
@@ -156,7 +157,7 @@ function renderSchematics() {
             </div>
             <div class="row popUpInputCont">
               <div class="col-md-7 col-xs-12 align-content-center imagesPopupDescription">
-               <input type="tel" input-type="tel" class="inputPhone" placeholder="+375XXXXXXXXX">
+               <input type="tel" name="tel" input-type="tel" class="inputPhone" placeholder="+375XXXXXXXXX" required>
               </div>
               <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 Нужен для обратной связи
@@ -164,12 +165,13 @@ function renderSchematics() {
             </div>
             <div class="row popUpInputCont">
               <div class="col-md-7 col-xs-12 align-content-center text-center imagesPopupDescription">
-               <button class="popUpButton" type="button" name="button">Отправить</button>
+               <button class="popUpButton" type="submit" name="button">Отправить</button>
               </div>
               <div class="col-md-4 col-xs-12 align-content-center inputPopUpTextDescription" class="popUpInputDescription">
                 После отправки, к Вам на почту придет письмо с дальнейшими инструкциями
               </div>
             </div>
+            </form>
           </div>
         </div>
       </div>
