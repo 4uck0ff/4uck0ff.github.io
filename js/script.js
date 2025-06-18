@@ -2,7 +2,9 @@ import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 import {
   GLTFLoader
 } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js';
+import {
+  RGBELoader
+} from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js';
 
 
 
@@ -67,7 +69,7 @@ const loader = new GLTFLoader();
 // Храним загруженные модели по имени
 const loadedModels = {};
 
-const modelNames = ['body', 'button1', 'button2', 'button3', 'button4', 'button5', 'button6', 'button7', 'button8', 'button9', 'button10', 'button11', 'button12', 'screen', 'text1', 'text2', 'text3'];
+const modelNames = ['body', 'button1', 'button2', 'button3', 'button4', 'button5', 'button6', 'button7', 'button8', 'button9', 'button10', 'button11', 'button12', 'screen', 'text1', 'text2', 'text3', 'underscreen'];
 
 function loadModel(name, xOffset = 0, onLoadCallback = null) {
   loader.load(
@@ -96,11 +98,17 @@ const parallaxTarget = scene;
 const parallaxSettings = {
   maxRotationX: 0.04, // в радианах (~3°)
   maxRotationY: 0.04,
-  lerpSpeed: 0.07      // скорость интерполяции
+  lerpSpeed: 0.07 // скорость интерполяции
 };
 
-const mousePos = { x: 0, y: 0 };        // положение мыши в нормализованных координатах
-const targetRotation = { x: 0, y: 0 };  // целевой поворот
+const mousePos = {
+  x: 0,
+  y: 0
+}; // положение мыши в нормализованных координатах
+const targetRotation = {
+  x: 0,
+  y: 0
+}; // целевой поворот
 
 // Слушаем движение мыши
 window.addEventListener('mousemove', (event) => {
@@ -253,7 +261,11 @@ function animateToPosition(object, targetPosition) {
 
 // 🚀 Функция анимации сдвига по локальной оси
 function moveModelLocal(object, axis = 'z', distance = 1) {
-  console.log('moveModelLocal вызвана с:', { object, axis, distance });
+  console.log('moveModelLocal вызвана с:', {
+    object,
+    axis,
+    distance
+  });
 
   if (!object) {
     console.error('moveModelLocal: объект не передан или undefined');
@@ -411,11 +423,11 @@ function applyGlassMaterial(
     roughness: roughness,
     transmission: 1.0, // стеклянный эффект
     ior: ior,
-    thickness: 0.5,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.1,
+    thickness: 0.1,
+    clearcoat: 1,
+    clearcoatRoughness: 0,
     transparent: true,
-    opacity: 1.0,
+    opacity: 0.9,
     emissive: new THREE.Color(emissionColor),
     emissiveIntensity: emissionIntensity
   });
@@ -431,7 +443,14 @@ function applyGlassMaterial(
 }
 
 
-function replaceMeshWithVideoPlane(object3D, { file, width = 1, height = 1, x = 0, y = 0, z = 0 }) {
+function replaceMeshWithVideoPlane(object3D, {
+  file,
+  width = 1,
+  height = 1,
+  x = 0,
+  y = 0,
+  z = 0
+}) {
   if (!object3D || !file) {
     console.warn('Нужны параметры: объект и имя файла');
     return;
@@ -468,7 +487,9 @@ function replaceMeshWithVideoPlane(object3D, { file, width = 1, height = 1, x = 
   // Гарантированный запуск при клике
   window.addEventListener('click', () => {
     video.play().catch(err => console.warn('Ошибка воспроизведения при клике:', err));
-  }, { once: true });
+  }, {
+    once: true
+  });
 
   // Создаём текстуру
   const texture = new THREE.VideoTexture(video);
@@ -476,7 +497,10 @@ function replaceMeshWithVideoPlane(object3D, { file, width = 1, height = 1, x = 
   texture.magFilter = THREE.LinearFilter;
   texture.format = THREE.RGBAFormat;
 
-  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.DoubleSide
+  });
   const geometry = new THREE.PlaneGeometry(width, height);
   const plane = new THREE.Mesh(geometry, material);
 
@@ -556,292 +580,302 @@ function changeVideoTextureOnPlane(newVideoFileName, fadeDuration = 0.5) {
   });
 }
 
+let rotX = -20;
+let rotY = -28.5;
+let rotZ = -10;
+
+loadModel('underscreen', 4, (model) => {
+  rotateModelY('underscreen', rotY);
+  rotateModelX('underscreen', rotX);
+  rotateModelZ('underscreen', rotZ);
+  // модель точно загружена
+});
 
 loadModel('screen', 4, (model) => {
-  rotateModelY('screen', -0);
-  rotateModelX('screen', -40);
-  rotateModelZ('screen', -15);
+  rotateModelY('screen', rotY);
+  rotateModelX('screen', rotX);
+  rotateModelZ('screen', rotZ);
   replaceMeshWithVideoPlane(model, {
-  file: 'blender.mp4',
-  width: 1.2,
-  height: 1.2,
-  x: 0,
-  y: 1,
-  z: .3
-});
+    file: 'start.mp4',
+    width: 1.1,
+    height: 1.1,
+    x: 0,
+    y: 1.05,
+    z: .31
+  });
   // модель точно загружена
 });
 
 loadModel('body', 4, (model) => {
-  rotateModelY('body', -0);
-  rotateModelX('body', -40);
-  rotateModelZ('body', -15);
+  rotateModelY('body', rotY);
+  rotateModelX('body', rotX);
+  rotateModelZ('body', rotZ);
   // модель точно загружена
 });
 
 loadModel('button1', 4, (model) => {
-  rotateModelY('button1', -0);
-  rotateModelX('button1', -40);
-  rotateModelZ('button1', -15);
+  rotateModelY('button1', rotY);
+  rotateModelX('button1', rotX);
+  rotateModelZ('button1', rotZ);
   enableClickMove('button1', 'z', -0.065, 'blender.mp4');
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button1',
-  '#ff9233',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  2,        // IOR (преломление)
-  0.1,         // roughness
-  0.5          // metallic
-);
+    'button1',
+    '#ff9233', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    2, // IOR (преломление)
+    0.1, // roughness
+    0.5 // metallic
+  );
 
   // модель точно загружена
 });
 
 loadModel('button2', 4, (model) => {
-  rotateModelY('button2', -0);
-  rotateModelX('button2', -40);
-  rotateModelZ('button2', -15);
-  enableClickMove('button2', 'z', -0.065, 'printer.mp4');
+  rotateModelY('button2', rotY);
+  rotateModelX('button2', rotX);
+  rotateModelZ('button2', rotZ);
+  enableClickMove('button2', 'z', -0.065, 'embergen.mp4');
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button2',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button2',
+    'red', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button3', 4, (model) => {
-  rotateModelY('button3', -0);
-  rotateModelX('button3', -40);
-  rotateModelZ('button3', -15);
-  enableClickMove('button3', 'z', -0.065);
+  rotateModelY('button3', rotY);
+  rotateModelX('button3', rotX);
+  rotateModelZ('button3', rotZ);
+  enableClickMove('button3', 'z', -0.065, 'houdini.mp4');
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button3',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button3',
+    'orange', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button4', 4, (model) => {
-  rotateModelY('button4', -0);
-  rotateModelX('button4', -40);
-  rotateModelZ('button4', -15);
+  rotateModelY('button4', rotY);
+  rotateModelX('button4', rotX);
+  rotateModelZ('button4', rotZ);
   enableClickMove('button4', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button4',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button4',
+    'purple', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button5', 4, (model) => {
-  rotateModelY('button5', -0);
-  rotateModelX('button5', -40);
-  rotateModelZ('button5', -15);
+  rotateModelY('button5', rotY);
+  rotateModelX('button5', rotX);
+  rotateModelZ('button5', rotZ);
   enableClickMove('button5', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button5',
-  '#ff9233',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  2,        // IOR (преломление)
-  0.1,         // roughness
-  0.5          // metallic
-);
+    'button5',
+    '#ff9233', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    2, // IOR (преломление)
+    0.1, // roughness
+    0.5 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button6', 4, (model) => {
-  rotateModelY('button6', -0);
-  rotateModelX('button6', -40);
-  rotateModelZ('button6', -15);
+  rotateModelY('button6', rotY);
+  rotateModelX('button6', rotX);
+  rotateModelZ('button6', rotZ);
   enableClickMove('button6', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button6',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button6',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button7', 4, (model) => {
-  rotateModelY('button7', -0);
-  rotateModelX('button7', -40);
-  rotateModelZ('button7', -15);
+  rotateModelY('button7', rotY);
+  rotateModelX('button7', rotX);
+  rotateModelZ('button7', rotZ);
   enableClickMove('button7', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button7',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button7',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button8', 4, (model) => {
-  rotateModelY('button8', -0);
-  rotateModelX('button8', -40);
-  rotateModelZ('button8', -15);
+  rotateModelY('button8', rotY);
+  rotateModelX('button8', rotX);
+  rotateModelZ('button8', rotZ);
   enableClickMove('button8', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button8',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button8',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button9', 4, (model) => {
-  rotateModelY('button9', -0);
-  rotateModelX('button9', -40);
-  rotateModelZ('button9', -15);
+  rotateModelY('button9', rotY);
+  rotateModelX('button9', rotX);
+  rotateModelZ('button9', rotZ);
   enableClickMove('button9', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button9',
-  '#ff9233',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  2,        // IOR (преломление)
-  0.1,         // roughness
-  0.5          // metallic
-);
+    'button9',
+    '#ff9233', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    2, // IOR (преломление)
+    0.1, // roughness
+    0.5 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button10', 4, (model) => {
-  rotateModelY('button10', -0);
-  rotateModelX('button10', -40);
-  rotateModelZ('button10', -15);
+  rotateModelY('button10', rotY);
+  rotateModelX('button10', rotX);
+  rotateModelZ('button10', rotZ);
   enableClickMove('button10', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button10',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button10',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button11', 4, (model) => {
-  rotateModelY('button11', -0);
-  rotateModelX('button11', -40);
-  rotateModelZ('button11', -15);
+  rotateModelY('button11', rotY);
+  rotateModelX('button11', rotX);
+  rotateModelZ('button11', rotZ);
   enableClickMove('button11', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button11',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button11',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('button12', 4, (model) => {
-  rotateModelY('button12', -0);
-  rotateModelX('button12', -40);
-  rotateModelZ('button12', -15);
+  rotateModelY('button12', rotY);
+  rotateModelX('button12', rotX);
+  rotateModelZ('button12', rotZ);
   enableClickMove('button12', 'z', -0.065);
   highlightableModels.add(model);
   applyGlassMaterial(
-  'button12',
-  '#00ffff',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.45,        // IOR (преломление)
-  0.2,         // roughness
-  0.8          // metallic
-);
+    'button12',
+    '#00ffff', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.45, // IOR (преломление)
+    0.2, // roughness
+    0.8 // metallic
+  );
   // модель точно загружена
 });
 
 
 
 loadModel('text1', 4, (model) => {
-  rotateModelY('text1', -0);
-  rotateModelX('text1', -40);
-  rotateModelZ('text1', -15);
+  rotateModelY('text1', rotY);
+  rotateModelX('text1', rotX);
+  rotateModelZ('text1', rotZ);
   applyGlassMaterial(
-  'text1',
-  'white',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.1,        // IOR (преломление)
-  0.9,         // roughness
-  1          // metallic
-);
+    'text1',
+    'white', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.1, // IOR (преломление)
+    0.9, // roughness
+    1 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('text2', 4, (model) => {
-  rotateModelY('text2', -0);
-  rotateModelX('text2', -40);
-  rotateModelZ('text2', -15);
+  rotateModelY('text2', rotY);
+  rotateModelX('text2', rotX);
+  rotateModelZ('text2', rotZ);
   applyGlassMaterial(
-  'text2',
-  'white',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.1,        // IOR (преломление)
-  0.9,         // roughness
-  1          // metallic
-);
+    'text2',
+    'white', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.1, // IOR (преломление)
+    0.9, // roughness
+    1 // metallic
+  );
   // модель точно загружена
 });
 
 loadModel('text3', 4, (model) => {
-  rotateModelY('text3', -0);
-  rotateModelX('text3', -40);
-  rotateModelZ('text3', -15);
+  rotateModelY('text3', rotY);
+  rotateModelX('text3', rotX);
+  rotateModelZ('text3', rotZ);
   applyGlassMaterial(
-  'text3',
-  'white',   // базовый цвет
-  '#ffffff',   // цвет свечения
-  0,         // интенсивность свечения
-  1.1,        // IOR (преломление)
-  0.9,         // roughness
-  1          // metallic
-);
+    'text3',
+    'white', // базовый цвет
+    '#ffffff', // цвет свечения
+    0, // интенсивность свечения
+    1.1, // IOR (преломление)
+    0.9, // roughness
+    1 // metallic
+  );
   // модель точно загружена
 });

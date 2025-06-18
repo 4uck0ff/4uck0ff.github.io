@@ -1,5 +1,15 @@
 .graphicsCont {
-  height:900px;
-  border: 2px red solid;
-  background-color:dimgrey;
+  height:100vh;
+  background-color:#1E1E1E;
+  z-index: 100;
        }
+
+.text {
+  font-size: 20px;
+  color:white;
+  background-color:#1E1E1E;
+  text-align: center;
+  padding-top:20%;
+  padding-left: 10%;
+  z-index: 1;
+}
