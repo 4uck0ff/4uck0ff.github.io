@@ -4,6 +4,10 @@
   z-index: 100;
        }
 
+.contFluid {
+    background-color:#1E1E1E;
+}
+
 .text {
   font-size: 20px;
   color:white;

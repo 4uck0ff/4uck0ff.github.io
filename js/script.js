@@ -36,12 +36,13 @@ pmremGenerator.compileEquirectangularShader();
 
 new RGBELoader()
   .setPath('hdr/') // папка рядом с index.html
-  .load('studio.hdr', (texture) => {
+  .load('night2.hdr', (texture) => {
     const envMap = pmremGenerator.fromEquirectangular(texture).texture;
     scene.environment = envMap;
     // scene.background = envMap; // можно раскомментировать, если хочешь видеть фон HDRI
     texture.dispose();
     pmremGenerator.dispose();
+
   });
 
 
@@ -50,17 +51,17 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // мягкий ра
 scene.add(ambientLight);
 
 const directionalLightCold = new THREE.DirectionalLight(0x4fa7ff, 1); // холодный свет
-directionalLightCold.position.set(-5, 10, 1);
+directionalLightCold.position.set(-10, 10, 1);
 directionalLightCold.castShadow = true;
 scene.add(directionalLightCold);
 
-const directionalLightMain = new THREE.DirectionalLight(0xffffff, 0.3); // основной свет
-directionalLightMain.position.set(1, 10, 1);
+const directionalLightMain = new THREE.DirectionalLight(0xffffff, 1); // основной свет
+directionalLightMain.position.set(4, 0, -2);
 directionalLightMain.castShadow = true;
 scene.add(directionalLightMain);
 
 const directionalLightWarm = new THREE.DirectionalLight(0xffbd87, 1); // теплый свет
-directionalLightWarm.position.set(5, 2, 1);
+directionalLightWarm.position.set(1, 0, 1);
 directionalLightWarm.castShadow = true;
 scene.add(directionalLightWarm);
 
@@ -326,81 +327,6 @@ function moveModelLocal(object, axis = 'z', distance = 1) {
   });
 }
 
-const highlightableModels = new Set(); // только для указанных моделей
-let lastHighlighted = null; // последний объект, на который был наведён курсор
-
-function increaseEmissionIntensity(object, delta = 1, duration = 0.5) {
-  object.traverse((child) => {
-    if (child.isMesh && child.material && 'emissiveIntensity' in child.material) {
-      const material = child.material;
-
-      // Сохраняем оригинальное значение, если ещё не сохранено
-      if (material.userData.originalEmissiveIntensity === undefined) {
-        material.userData.originalEmissiveIntensity = material.emissiveIntensity;
-      }
-
-      const target = material.userData.originalEmissiveIntensity + delta;
-
-      gsap.to(material, {
-        emissiveIntensity: target,
-        duration: duration,
-        ease: 'power2.out'
-      });
-    }
-  });
-}
-
-function resetEmissionIntensity(object, duration = 0.5) {
-  object.traverse((child) => {
-    if (child.isMesh && child.material && 'emissiveIntensity' in child.material) {
-      const material = child.material;
-      const original = material.userData.originalEmissiveIntensity;
-
-      if (original !== undefined) {
-        gsap.to(material, {
-          emissiveIntensity: original,
-          duration: duration,
-          ease: 'power2.out'
-        });
-      }
-    }
-  });
-}
-
-renderer.domElement.addEventListener('mousemove', (event) => {
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  const models = Array.from(highlightableModels);
-  const intersects = raycaster.intersectObjects(models, true);
-
-  if (intersects.length > 0) {
-    const hovered = intersects[0].object;
-
-    let modelGroup = hovered;
-    while (modelGroup && !highlightableModels.has(modelGroup)) {
-      modelGroup = modelGroup.parent;
-    }
-
-    if (modelGroup && modelGroup !== lastHighlighted) {
-      if (lastHighlighted) {
-        resetEmissionIntensity(lastHighlighted);
-      }
-      increaseEmissionIntensity(modelGroup, 0.2); // увеличиваем на 1
-      lastHighlighted = modelGroup;
-    }
-  } else {
-    if (lastHighlighted) {
-      resetEmissionIntensity(lastHighlighted);
-      lastHighlighted = null;
-    }
-  }
-});
-
-
 function applyGlassMaterial(
   modelName,
   baseColor = '#ffffff',
@@ -580,6 +506,180 @@ function changeVideoTextureOnPlane(newVideoFileName, fadeDuration = 0.5) {
   });
 }
 
+
+const originalEmissiveColors = new Map();
+const originalEmissiveIntensity = new Map();
+const hoveredObjects = new Set();
+
+function buttonHover(object, hoverIntensity = 20) {
+  if (!object) {
+    console.warn('buttonHover: передан пустой объект');
+    return;
+  }
+
+  //console.log('buttonHover: Наведение на объект установлено');
+
+  window.addEventListener('mousemove', (event) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObject(object, true);
+
+    if (intersects.length > 0) {
+      if (!hoveredObjects.has(object)) {
+        //console.log('Наведение на объект');
+        storeOriginalEmissive(object);
+        animateEmission(object, new THREE.Color(0xffffff), hoverIntensity, 20);
+        hoveredObjects.add(object);
+      }
+    } else {
+      if (hoveredObjects.has(object)) {
+        //console.log('Уход с объекта');
+        animateRestoreEmission(object, 250);
+        hoveredObjects.delete(object);
+      }
+    }
+  });
+}
+
+function storeOriginalEmissive(object) {
+  object.traverse((child) => {
+    if (child.isMesh && child.material) {
+      if (Array.isArray(child.material)) {
+        child.material.forEach((mat, i) => {
+          const key = child.uuid + '_' + i;
+          if (!originalEmissiveColors.has(key)) {
+            originalEmissiveColors.set(key, mat.emissive.clone());
+            originalEmissiveIntensity.set(key, mat.emissiveIntensity ?? 1);
+          }
+        });
+      } else {
+        const key = child.uuid;
+        if (!originalEmissiveColors.has(key)) {
+          originalEmissiveColors.set(key, child.material.emissive.clone());
+          originalEmissiveIntensity.set(key, child.material.emissiveIntensity ?? 1);
+        }
+      }
+    }
+  });
+}
+
+function animateEmission(object, targetColor, targetIntensity, duration = 250) {
+  const startTime = performance.now();
+
+  const materials = [];
+  object.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const collect = (mat) => {
+        materials.push({
+          material: mat,
+          startColor: mat.emissive.clone(),
+          startIntensity: mat.emissiveIntensity ?? 1,
+        });
+      };
+      if (Array.isArray(child.material)) {
+        child.material.forEach(collect);
+      } else {
+        collect(child.material);
+      }
+    }
+  });
+
+  function lerpColor(c1, c2, t) {
+    return new THREE.Color(
+      c1.r + (c2.r - c1.r) * t,
+      c1.g + (c2.g - c1.g) * t,
+      c1.b + (c2.b - c1.b) * t
+    );
+  }
+
+  function animate() {
+    const now = performance.now();
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+
+    materials.forEach(({
+      material,
+      startColor,
+      startIntensity
+    }) => {
+      material.emissive = lerpColor(startColor, targetColor, t);
+      material.emissiveIntensity = startIntensity + (targetIntensity - startIntensity) * t;
+      material.needsUpdate = true;
+    });
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+
+function animateRestoreEmission(object, duration = 250) {
+  const startTime = performance.now();
+
+  const materials = [];
+  object.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const collect = (mat, key) => {
+        if (originalEmissiveColors.has(key)) {
+          materials.push({
+            material: mat,
+            startColor: mat.emissive.clone(),
+            startIntensity: mat.emissiveIntensity ?? 1,
+            targetColor: originalEmissiveColors.get(key),
+            targetIntensity: originalEmissiveIntensity.get(key),
+          });
+        }
+      };
+      if (Array.isArray(child.material)) {
+        child.material.forEach((mat, i) => collect(mat, child.uuid + '_' + i));
+      } else {
+        collect(child.material, child.uuid);
+      }
+    }
+  });
+
+  function lerpColor(c1, c2, t) {
+    return new THREE.Color(
+      c1.r + (c2.r - c1.r) * t,
+      c1.g + (c2.g - c1.g) * t,
+      c1.b + (c2.b - c1.b) * t
+    );
+  }
+
+  function animate() {
+    const now = performance.now();
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+
+    materials.forEach(({
+      material,
+      startColor,
+      startIntensity,
+      targetColor,
+      targetIntensity
+    }) => {
+      material.emissive = lerpColor(startColor, targetColor, t);
+      material.emissiveIntensity = startIntensity + (targetIntensity - startIntensity) * t;
+      material.needsUpdate = true;
+    });
+
+    if (t < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  animate();
+}
+
+
+
+
+
 let rotX = -20;
 let rotY = -28.5;
 let rotZ = -10;
@@ -614,75 +714,92 @@ loadModel('body', 4, (model) => {
 });
 
 loadModel('button1', 4, (model) => {
+  // Найдём внутри модели меш
+  let targetObject = null;
+  model.traverse((child) => {
+    if (child.isMesh) {
+      targetObject = child; // если нужно несколько — усложним логику
+    }
+  });
+
+  if (!targetObject) {
+    console.warn('Не найден меш внутри модели для hover');
+    return;
+  }
   rotateModelY('button1', rotY);
   rotateModelX('button1', rotX);
   rotateModelZ('button1', rotZ);
   enableClickMove('button1', 'z', -0.065, 'blender.mp4');
-  highlightableModels.add(model);
-  applyGlassMaterial(
-    'button1',
-    '#ff9233', // базовый цвет
-    '#ffffff', // цвет свечения
-    0, // интенсивность свечения
-    2, // IOR (преломление)
-    0.1, // roughness
-    0.5 // metallic
-  );
-
+  buttonHover(targetObject, 20);
   // модель точно загружена
 });
 
 loadModel('button2', 4, (model) => {
+  // Найдём внутри модели меш
+  let targetObject = null;
+  model.traverse((child) => {
+    if (child.isMesh) {
+      targetObject = child; // если нужно несколько — усложним логику
+    }
+  });
+
+  if (!targetObject) {
+    console.warn('Не найден меш внутри модели для hover');
+    return;
+  }
   rotateModelY('button2', rotY);
   rotateModelX('button2', rotX);
   rotateModelZ('button2', rotZ);
   enableClickMove('button2', 'z', -0.065, 'embergen.mp4');
-  highlightableModels.add(model);
-  applyGlassMaterial(
-    'button2',
-    'red', // базовый цвет
-    '#ffffff', // цвет свечения
-    0, // интенсивность свечения
-    1.45, // IOR (преломление)
-    0.2, // roughness
-    0.8 // metallic
-  );
+  console.log('Материалы button2:');
+  targetObject.traverse((child) => {
+    if (child.isMesh) {
+      console.log(child.name, child.material);
+    }
+  });
+  buttonHover(targetObject, 150);
   // модель точно загружена
 });
 
 loadModel('button3', 4, (model) => {
+  // Найдём внутри модели меш
+  let targetObject = null;
+  model.traverse((child) => {
+    if (child.isMesh) {
+      targetObject = child; // если нужно несколько — усложним логику
+    }
+  });
+
+  if (!targetObject) {
+    console.warn('Не найден меш внутри модели для hover');
+    return;
+  }
   rotateModelY('button3', rotY);
   rotateModelX('button3', rotX);
   rotateModelZ('button3', rotZ);
   enableClickMove('button3', 'z', -0.065, 'houdini.mp4');
-  highlightableModels.add(model);
-  applyGlassMaterial(
-    'button3',
-    'orange', // базовый цвет
-    '#ffffff', // цвет свечения
-    0, // интенсивность свечения
-    1.45, // IOR (преломление)
-    0.2, // roughness
-    0.8 // metallic
-  );
+  buttonHover(targetObject);
   // модель точно загружена
 });
 
 loadModel('button4', 4, (model) => {
+  // Найдём внутри модели меш
+  let targetObject = null;
+  model.traverse((child) => {
+    if (child.isMesh) {
+      targetObject = child; // если нужно несколько — усложним логику
+    }
+  });
+
+  if (!targetObject) {
+    console.warn('Не найден меш внутри модели для hover');
+    return;
+  }
   rotateModelY('button4', rotY);
   rotateModelX('button4', rotX);
   rotateModelZ('button4', rotZ);
-  enableClickMove('button4', 'z', -0.065);
-  highlightableModels.add(model);
-  applyGlassMaterial(
-    'button4',
-    'purple', // базовый цвет
-    '#ffffff', // цвет свечения
-    0, // интенсивность свечения
-    1.45, // IOR (преломление)
-    0.2, // roughness
-    0.8 // metallic
-  );
+  enableClickMove('button4', 'z', -0.065, 'design.mp4');
+  buttonHover(targetObject);
   // модель точно загружена
 });
 
@@ -691,7 +808,7 @@ loadModel('button5', 4, (model) => {
   rotateModelX('button5', rotX);
   rotateModelZ('button5', rotZ);
   enableClickMove('button5', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button5',
     '#ff9233', // базовый цвет
@@ -709,7 +826,7 @@ loadModel('button6', 4, (model) => {
   rotateModelX('button6', rotX);
   rotateModelZ('button6', rotZ);
   enableClickMove('button6', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button6',
     '#00ffff', // базовый цвет
@@ -727,7 +844,7 @@ loadModel('button7', 4, (model) => {
   rotateModelX('button7', rotX);
   rotateModelZ('button7', rotZ);
   enableClickMove('button7', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button7',
     '#00ffff', // базовый цвет
@@ -745,7 +862,7 @@ loadModel('button8', 4, (model) => {
   rotateModelX('button8', rotX);
   rotateModelZ('button8', rotZ);
   enableClickMove('button8', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button8',
     '#00ffff', // базовый цвет
@@ -763,7 +880,7 @@ loadModel('button9', 4, (model) => {
   rotateModelX('button9', rotX);
   rotateModelZ('button9', rotZ);
   enableClickMove('button9', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button9',
     '#ff9233', // базовый цвет
@@ -781,7 +898,7 @@ loadModel('button10', 4, (model) => {
   rotateModelX('button10', rotX);
   rotateModelZ('button10', rotZ);
   enableClickMove('button10', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button10',
     '#00ffff', // базовый цвет
@@ -799,7 +916,7 @@ loadModel('button11', 4, (model) => {
   rotateModelX('button11', rotX);
   rotateModelZ('button11', rotZ);
   enableClickMove('button11', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button11',
     '#00ffff', // базовый цвет
@@ -817,7 +934,7 @@ loadModel('button12', 4, (model) => {
   rotateModelX('button12', rotX);
   rotateModelZ('button12', rotZ);
   enableClickMove('button12', 'z', -0.065);
-  highlightableModels.add(model);
+
   applyGlassMaterial(
     'button12',
     '#00ffff', // базовый цвет
