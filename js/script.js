@@ -169,7 +169,7 @@ const interactiveModels = new Map(); // model → { axis: 'z', distance: 1 }
 let activeModel = null;
 
 // ✅ Функция для активации интерактивности
-function enableClickMove(name, axis = 'z', distance = 1) {
+function enableClickMove(name, axis = 'z', distance = 1, videoFileName = null) {
   const model = loadedModels[name];
   if (!model) {
     console.warn(`enableClickMove: модель "${name}" ещё не загружена`);
@@ -181,7 +181,8 @@ function enableClickMove(name, axis = 'z', distance = 1) {
     axis,
     distance,
     originalPosition,
-    moved: false
+    moved: false,
+    videoFileName, // добавляем сюда имя видео
   });
 }
 
@@ -212,7 +213,7 @@ renderer.domElement.addEventListener('click', (event) => {
         return;
       }
 
-      // Вернуть предыдущую активную модель, если есть
+      // Возврат предыдущей активной модели
       if (activeModel && activeModel !== object) {
         const prevData = interactiveModels.get(activeModel);
         if (prevData) {
@@ -222,13 +223,19 @@ renderer.domElement.addEventListener('click', (event) => {
         }
       }
 
-      // Сдвигаем текущую
+      // Сдвиг текущей модели
       moveModelLocal(object, data.axis, data.distance);
       data.moved = true;
       activeModel = object;
+
+      // Если для этой модели задано имя видео — меняем текстуру
+      if (data.videoFileName) {
+        changeVideoTextureOnPlane(data.videoFileName);
+      }
     }
   }
 });
+
 
 function animateToPosition(object, targetPosition) {
   gsap.to(object.position, {
@@ -420,93 +427,155 @@ function applyGlassMaterial(
     }
   });
 
-  console.log(`Применён стеклянный материал к модели "${modelName}"`, {
-    baseColor,
-    emissionColor,
-    emissionIntensity,
-    ior,
-    roughness,
-    metalness
-  });
+
 }
 
-function updateMaterialProperties(object3D, options = {}) {
-  const material = object3D.material;
-  if (!material || !material.color) {
-    console.warn('Объект не имеет подходящего материала с цветом');
+
+function replaceMeshWithVideoPlane(object3D, { file, width = 1, height = 1, x = 0, y = 0, z = 0 }) {
+  if (!object3D || !file) {
+    console.warn('Нужны параметры: объект и имя файла');
     return;
   }
 
-  // Получаем текущий цвет и конвертируем в HSV
-  const color = material.color.clone(); // THREE.Color
-  const hsv = {};
-  color.getHSL(hsv); // HSL ≈ HSV, подходит для целей hue/saturation/value
+  // Получаем мировую позицию и ориентацию объекта
+  const worldPosition = new THREE.Vector3();
+  const worldQuaternion = new THREE.Quaternion();
+  object3D.getWorldPosition(worldPosition);
+  object3D.getWorldQuaternion(worldQuaternion);
 
-  // Преобразуем HSL к HSV (на практике можно использовать напрямую)
-  let h = hsv.h, s = hsv.s, l = hsv.l;
-  const v = l + s * Math.min(l, 1 - l); // приближённое значение value
-
-  // Обновляем HSV, если указаны
-  if (options.hue !== undefined) h = options.hue;
-  if (options.saturation !== undefined) s = options.saturation;
-  if (options.value !== undefined) l = options.value; // value ≈ lightness
-
-  // Применяем обратно
-  const newColor = new THREE.Color();
-  newColor.setHSL(h, s, l);
-  material.color.copy(newColor);
-
-  // Обновляем металлическость и шероховатость, если указаны
-  if (options.metallic !== undefined) material.metalness = options.metallic;
-  if (options.roughness !== undefined) material.roughness = options.roughness;
-
-  material.needsUpdate = true;
-}
-
-function applyVideoTextureToObject(object3D, { file }) {
-  if (!file) {
-    console.warn('Не указано имя видеофайла в параметре { file }');
-    return;
+  // Удаляем объект из сцены
+  if (object3D.parent) {
+    object3D.parent.remove(object3D);
   }
 
   const video = document.createElement('video');
   video.src = `vids/${file}`;
   video.loop = true;
-  video.muted = true;
-  video.playsInline = true;
-  video.autoplay = true;
 
-  video.addEventListener('canplay', () => {
-    video.play();
+  // Атрибуты для автозапуска
+  video.setAttribute('autoplay', '');
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.muted = true;
+  video.autoplay = true;
+  video.playsInline = true;
+
+  // Попытка сразу запустить
+  video.play().catch(() => {
+    console.log('Видео не запустилось — ждёт клика');
   });
 
+  // Гарантированный запуск при клике
+  window.addEventListener('click', () => {
+    video.play().catch(err => console.warn('Ошибка воспроизведения при клике:', err));
+  }, { once: true });
+
+  // Создаём текстуру
   const texture = new THREE.VideoTexture(video);
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
   texture.format = THREE.RGBAFormat;
 
-  // Применяем текстуру
-  if (object3D.material) {
-    object3D.material.map = texture;
-    object3D.material.needsUpdate = true;
-  } else {
-    object3D.material = new THREE.MeshBasicMaterial({ map: texture });
+  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+  const geometry = new THREE.PlaneGeometry(width, height);
+  const plane = new THREE.Mesh(geometry, material);
+
+  // ✅ Назначаем имя новому объекту
+  plane.name = `Screen_videoPlane`;
+  console.log(plane.name);
+
+  // Преобразуем смещение из локальных координат в мировые
+  const localOffset = new THREE.Vector3(x, y, z).applyQuaternion(worldQuaternion);
+  const finalPosition = worldPosition.clone().add(localOffset);
+
+  // Устанавливаем позицию и поворот
+  plane.position.copy(finalPosition);
+  plane.quaternion.copy(worldQuaternion);
+
+  // Добавляем в сцену
+  scene.add(plane);
+
+  return plane;
+}
+
+function changeVideoTextureOnPlane(newVideoFileName, fadeDuration = 0.5) {
+  const plane = scene.getObjectByName('Screen_videoPlane');
+  if (!plane) {
+    console.warn('Плоскость "Screen_videoPlane" не найдена.');
+    return;
   }
+
+  const oldMaterial = plane.material;
+
+  // Создаём новый video элемент
+  const newVideo = document.createElement('video');
+  newVideo.src = `./vids/${newVideoFileName}`;
+  newVideo.crossOrigin = 'anonymous';
+  newVideo.loop = true;
+  newVideo.muted = true;
+  newVideo.playsInline = true;
+  newVideo.autoplay = true;
+  newVideo.play();
+
+  const newTexture = new THREE.VideoTexture(newVideo);
+  newTexture.minFilter = THREE.LinearFilter;
+  newTexture.magFilter = THREE.LinearFilter;
+  newTexture.format = THREE.RGBAFormat;
+
+  const newMaterial = new THREE.MeshBasicMaterial({
+    map: newTexture,
+    transparent: true,
+    opacity: 0 // Сначала полностью прозрачный
+  });
+
+  // Временная плоскость для плавного перехода
+  const tempPlane = new THREE.Mesh(plane.geometry.clone(), newMaterial);
+  tempPlane.name = 'Temp_videoPlane';
+  tempPlane.position.copy(plane.position);
+  tempPlane.rotation.copy(plane.rotation);
+  tempPlane.scale.copy(plane.scale);
+  plane.parent.add(tempPlane);
+
+  // Анимация затухания старого материала
+  gsap.to(oldMaterial, {
+    opacity: 0,
+    duration: fadeDuration,
+    ease: 'power2.out',
+    onComplete: () => {
+      oldMaterial.dispose();
+      plane.material = newMaterial;
+      plane.parent.remove(tempPlane);
+    }
+  });
+
+  // Анимация появления нового материала
+  gsap.to(newMaterial, {
+    opacity: 1,
+    duration: fadeDuration,
+    ease: 'power2.out'
+  });
 }
 
 
+loadModel('screen', 4, (model) => {
+  rotateModelY('screen', -0);
+  rotateModelX('screen', -40);
+  rotateModelZ('screen', -15);
+  replaceMeshWithVideoPlane(model, {
+  file: 'blender.mp4',
+  width: 1.2,
+  height: 1.2,
+  x: 0,
+  y: 1,
+  z: .3
+});
+  // модель точно загружена
+});
 
 loadModel('body', 4, (model) => {
   rotateModelY('body', -0);
   rotateModelX('body', -40);
   rotateModelZ('body', -15);
-  updateMaterialProperties(model, {
-  //hue: 0.5,
-  //saturation: 0.7,
-  value: 2
-  //metallic: 1,
-  //roughness: 0
-});
   // модель точно загружена
 });
 
@@ -514,7 +583,7 @@ loadModel('button1', 4, (model) => {
   rotateModelY('button1', -0);
   rotateModelX('button1', -40);
   rotateModelZ('button1', -15);
-  enableClickMove('button1', 'z', -0.065);
+  enableClickMove('button1', 'z', -0.065, 'blender.mp4');
   highlightableModels.add(model);
   applyGlassMaterial(
   'button1',
@@ -525,6 +594,7 @@ loadModel('button1', 4, (model) => {
   0.1,         // roughness
   0.5          // metallic
 );
+
   // модель точно загружена
 });
 
@@ -532,7 +602,7 @@ loadModel('button2', 4, (model) => {
   rotateModelY('button2', -0);
   rotateModelX('button2', -40);
   rotateModelZ('button2', -15);
-  enableClickMove('button2', 'z', -0.065);
+  enableClickMove('button2', 'z', -0.065, 'printer.mp4');
   highlightableModels.add(model);
   applyGlassMaterial(
   'button2',
@@ -726,13 +796,7 @@ loadModel('button12', 4, (model) => {
   // модель точно загружена
 });
 
-loadModel('screen', 4, (model) => {
-  rotateModelY('screen', -0);
-  rotateModelX('screen', -40);
-  rotateModelZ('screen', -15);
-  applyVideoTextureToObject(model, { file: 'blender.mp4' });
-  // модель точно загружена
-});
+
 
 loadModel('text1', 4, (model) => {
   rotateModelY('text1', -0);
