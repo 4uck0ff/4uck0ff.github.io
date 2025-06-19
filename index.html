@@ -21,6 +21,7 @@
   </script>
   <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
   <script type="module" src="js/script.js"></script>
+  <script type="module" src="js/shaders.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
   <script src="js/wow.min.js"></script>
@@ -33,18 +34,36 @@
   <!-- Прелоадер -->
 <div id="preloader">
   <div class="spinner"></div>
+  <div class="preloaderText">
+    Loading...
+  </div>
 </div>
 
   <div class="container-fluid contFluid">
-    <div class="container">
+    <div class="container-fluid mainCont">
       <div class="row">
-        <div class="col-xs-12 col-md-6 text">
-          Пока что работают первые 4 кнопки.
+        <div class="col-xs-12 col-md-3 borderTest">
+          <div class="row">
+            <div class="col-12 textHeader" style="padding-top:8vh;">
+              ARTEM KRASNOV
+            </div>
+            <div class="col-12 textHeaderItal">
+              AKA 4UCK0FF
+            </div>
+            <div class="col-12 textHeader" style="padding-top:8vh;">
+              3D ANIMATOR
+            </div>
+            <div class="col-12 textHeader">
+              3D GENERALIST
+            </div>
+          </div>
         </div>
-        <div class="col-xs-12 col-md-6 graphicsCont" id="SceneMainContainer">
+        <div class="col-xs-12 col-md-5 graphicsCont borderTest" id="SceneMainContainer">
 
         </div>
-
+        <div class="col-xs-12 col-md-4 textMain borderTest">
+Пока что работают первые 4 кнопки.
+        </div>
       </div>
     </div>
   </div>

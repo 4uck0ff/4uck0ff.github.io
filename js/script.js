@@ -6,6 +6,124 @@ import {
   RGBELoader
 } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js';
 
+const customShaderMaterials = [];
+
+function applyChromeMaterial(
+  modelName,
+  baseColor = '#cccccc',
+  emissionColor = '#ffffff',
+  emissionIntensity = 0.2,
+  ior = 1.0,              // для металлов IOR не особо важен
+  roughness = 0.05,
+  metalness = 1.0
+) {
+  const model = loadedModels[modelName];
+  if (!model) {
+    console.warn(`applyChromeMaterial: модель "${modelName}" не найдена`);
+    return;
+  }
+
+  const material = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(baseColor),
+    metalness,
+    roughness,
+    transmission: 0.0,
+    ior,
+    thickness: 0.0,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.0,
+    transparent: false,
+    opacity: 1.0,
+    emissive: new THREE.Color(emissionColor),
+    emissiveIntensity: emissionIntensity,
+    envMapIntensity: 2.0,
+  });
+
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.time = { value: 0.0 };
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      `#include <common>`,
+      `#include <common>
+
+      uniform float time;
+      varying vec2 vUv;
+      varying vec3 vViewDir;
+
+      float myRand(vec2 co){
+        return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+      }
+
+      float getNoise(vec2 p){
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        float a = myRand(i);
+        float b = myRand(i + vec2(1.0, 0.0));
+        float c = myRand(i + vec2(0.0, 1.0));
+        float d = myRand(i + vec2(1.0, 1.0));
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(a, b, u.x) +
+              (c - a)* u.y * (1.0 - u.x) +
+              (d - b) * u.x * u.y;
+      }
+
+      vec2 projectReflect(vec3 v) {
+        return normalize(v).xy * 0.5 + 0.5;
+      }
+      `
+    );
+
+    shader.vertexShader = shader.vertexShader.replace(
+      `#include <common>`,
+      `#include <common>
+      varying vec2 vUv;
+      varying vec3 vViewDir;
+      `
+    );
+    shader.vertexShader = shader.vertexShader.replace(
+      `#include <uv_vertex>`,
+      `#include <uv_vertex>
+      vUv = uv;
+      vViewDir = normalize(cameraPosition - (modelViewMatrix * vec4(position, 1.0)).xyz);
+      `
+    );
+
+    shader.fragmentShader = shader.fragmentShader.replace(
+      `#include <dithering_fragment>`,
+      `
+      vec2 uvNoise = vUv * 40.0 + vec2(time * 0.2, time * 0.2);
+      float noiseVal = getNoise(uvNoise);
+
+      float edgeFresnel = pow(1.0 - dot(normal, normalize(vViewDir)), 5.0);
+      vec2 reflectUV = projectReflect(normal);
+      vec3 envCol = texture2D(envMap, reflectUV + vec2(noiseVal * 0.005)).rgb;
+
+      // Хромовый цвет — отражения с небольшой искажённостью
+      vec3 chromeColor = envCol * 1.2;
+
+      // Усиленный блеск по краям (френель)
+      vec3 glossyHighlight = chromeColor * edgeFresnel * 1.5;
+
+      // Итоговый цвет, почти полностью отражающий
+      outgoingLight = mix(outgoingLight, glossyHighlight, 0.95);
+
+      #include <dithering_fragment>
+      `
+    );
+
+    customShaderMaterials.push(shader);
+  };
+
+  model.traverse((child) => {
+    if (child.isMesh) {
+      child.material = material;
+      child.material.needsUpdate = true;
+    }
+  });
+}
+
+
+
 function hidePreloader() {
   const preloader = document.getElementById('preloader');
   preloader.style.opacity = '0';
@@ -40,12 +158,12 @@ const scene = new THREE.Scene();
 scene.background = null; // Прозрачный фон
 
 const camera = new THREE.PerspectiveCamera(
-  45,
+  55,
   container.clientWidth / container.clientHeight,
   0.1,
   1000
 );
-camera.position.set(0, 0, 5);
+camera.position.set(0, 0, 4.5);
 camera.lookAt(scene.position);
 
 const renderer = new THREE.WebGLRenderer({
@@ -93,7 +211,7 @@ scene.add(directionalLightWarm);
 // Храним загруженные модели по имени
 const loadedModels = {};
 
-const modelNames = ['body', 'button1', 'button2', 'button3', 'button4', 'button5', 'button6', 'button7', 'button8', 'button9', 'button10', 'button11', 'button12', 'screen', 'text1', 'text2', 'text3', 'underscreen'];
+const modelNames = ['body', 'button1', 'button2', 'button3', 'button4', 'button5', 'button6', 'button7', 'button8', 'button9', 'button10', 'button11', 'button12', 'screen', 'text1', 'text2', 'text3', 'underscreen', 'cubes'];
 
 function loadModel(name, xOffset = 0, onLoadCallback = null) {
   loader.load(
@@ -151,6 +269,12 @@ function animate() {
   // Интерполяция текущего поворота к целевому
   parallaxTarget.rotation.x += (targetRotation.x - parallaxTarget.rotation.x) * parallaxSettings.lerpSpeed;
   parallaxTarget.rotation.y += (targetRotation.y - parallaxTarget.rotation.y) * parallaxSettings.lerpSpeed;
+
+  customShaderMaterials.forEach((shader) => {
+    if (shader.uniforms.time) {
+      shader.uniforms.time.value = performance.now() / 1000;
+    }
+  });
 
   renderer.render(scene, camera);
 }
@@ -733,6 +857,7 @@ loadModel('body', 4, (model) => {
   rotateModelY('body', rotY);
   rotateModelX('body', rotX);
   rotateModelZ('body', rotZ);
+  
   console.log('Загружен body');
 
   // модель точно загружена
@@ -1051,3 +1176,12 @@ loadModel('text3', 4, (model) => {
 
   // модель точно загружена
 });
+
+//loadModel('cubes', 4, (model) => {
+  //rotateModelY('cubes', rotY);
+  //rotateModelX('cubes', rotX);
+  //rotateModelZ('cubes', rotZ);
+//  console.log('Загружен cubes');
+
+  // модель точно загружена
+//});
