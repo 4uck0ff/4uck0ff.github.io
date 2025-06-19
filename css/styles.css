@@ -41,14 +41,14 @@
 }
 
 .mainCont {
-  width:1920px;
+  width:80vw;
 }
+
 
 .textHeader {
   font-family: 'PetrovSansBold';
   font-size: 40px;
   color:white;
-  background-color:#1E1E1E;
   text-align: left;
   z-index: 1;
 
@@ -67,9 +67,22 @@
   color:white;
 }
 
-.borderTest {
-  border:2px solid white;
+.articleHeader {
+  font-family: 'PetrovSansBold';
+  font-size: 3vw;
+  color:#EFA742;
+  text-align: center;
+  padding-top:6vh;
 }
+
+.articleText {
+  text-align: justify;
+}
+
+.borderTest {
+  border:0px solid white;
+}
+
 
 /* Фулскрин прелоадер */
     #preloader {

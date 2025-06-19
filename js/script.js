@@ -324,8 +324,7 @@ const mouse = new THREE.Vector2();
 const interactiveModels = new Map(); // model → { axis: 'z', distance: 1 }
 let activeModel = null;
 
-// ✅ Функция для активации интерактивности
-function enableClickMove(name, axis = 'z', distance = 1, videoFileName = null) {
+function enableClickMove(name, axis = 'z', distance = 1, videoFileName = null, textBlockId = null) {
   const model = loadedModels[name];
   if (!model) {
     console.warn(`enableClickMove: модель "${name}" ещё не загружена`);
@@ -338,12 +337,70 @@ function enableClickMove(name, axis = 'z', distance = 1, videoFileName = null) {
     distance,
     originalPosition,
     moved: false,
-    videoFileName, // добавляем сюда имя видео
+    videoFileName,   // видео, если нужно
+    textBlockId      // 💬 добавляем поддержку текстового блока
   });
 }
 
+function changeTextBlock(id) {
+  const blocks = document.querySelectorAll('.text-block');
+  let currentVisible = null;
 
-// 🔁 Обработчик клика
+  blocks.forEach(block => {
+    if (block.style.display === 'block') {
+      currentVisible = block;
+    }
+  });
+
+  if (currentVisible && currentVisible.id === id) {
+    return; // если кликаем на уже видимый блок — ничего не делаем
+  }
+
+  // Функция показа нового блока
+  function showNewBlock() {
+    const newBlock = document.getElementById(id);
+    if (newBlock) {
+      newBlock.style.display = 'block';
+      newBlock.classList.remove('fadeOut');
+      newBlock.classList.add('animated', 'fadeIn');
+      new WOW().sync(); // используем sync(), если WOW уже инициализирован
+    }
+  }
+
+  // Если есть активный блок — анимируем скрытие
+  if (currentVisible) {
+    currentVisible.classList.remove('fadeIn');
+    currentVisible.classList.add('animated', 'fadeOut');
+
+    // Назначаем анонимную функцию, но с удалением после первого вызова
+    const onAnimEnd = function () {
+      currentVisible.style.display = 'none';
+      currentVisible.classList.remove('animated', 'fadeOut');
+      currentVisible.removeEventListener('animationend', onAnimEnd);
+
+      showNewBlock(); // показать новый после скрытия текущего
+    };
+
+    currentVisible.addEventListener('animationend', onAnimEnd);
+  } else {
+    showNewBlock();
+  }
+}
+
+
+function showNewBlock(id) {
+  const newBlock = document.getElementById(id);
+  if (newBlock) {
+    newBlock.style.display = 'block';
+    newBlock.classList.remove('fadeOut');
+    newBlock.classList.add('animated', 'fadeIn');
+
+    // WOW.js: триггерим повторную инициализацию (если нужно)
+    new WOW().init();
+  }
+}
+
+
 renderer.domElement.addEventListener('click', (event) => {
   const rect = renderer.domElement.getBoundingClientRect();
   mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -352,7 +409,6 @@ renderer.domElement.addEventListener('click', (event) => {
   raycaster.setFromCamera(mouse, camera);
 
   const models = Array.from(interactiveModels.keys());
-
   const intersects = raycaster.intersectObjects(models, true);
 
   if (intersects.length > 0) {
@@ -387,6 +443,12 @@ renderer.domElement.addEventListener('click', (event) => {
       // Если для этой модели задано имя видео — меняем текстуру
       if (data.videoFileName) {
         changeVideoTextureOnPlane(data.videoFileName);
+      }
+
+      // 👉 Если задан блок текста — показываем его с анимацией
+      if (data.textBlockId) {
+        changeTextBlock(data.textBlockId);
+        console.log('Текстовый блок заменен');
       }
     }
   }
@@ -857,7 +919,7 @@ loadModel('body', 4, (model) => {
   rotateModelY('body', rotY);
   rotateModelX('body', rotX);
   rotateModelZ('body', rotZ);
-  
+
   console.log('Загружен body');
 
   // модель точно загружена
@@ -879,7 +941,7 @@ loadModel('button1', 4, (model) => {
   rotateModelY('button1', rotY);
   rotateModelX('button1', rotX);
   rotateModelZ('button1', rotZ);
-  enableClickMove('button1', 'z', -0.065, 'blender.mp4');
+  enableClickMove('button1', 'z', -0.065, 'blender.mp4','button1');
   buttonHover(targetObject, 20);
   console.log('Загружен button');
 
@@ -902,7 +964,7 @@ loadModel('button2', 4, (model) => {
   rotateModelY('button2', rotY);
   rotateModelX('button2', rotX);
   rotateModelZ('button2', rotZ);
-  enableClickMove('button2', 'z', -0.065, 'embergen.mp4');
+  enableClickMove('button2', 'z', -0.065, 'embergen.mp4','button2');
   console.log('Материалы button2:');
   targetObject.traverse((child) => {
     if (child.isMesh) {
@@ -931,7 +993,7 @@ loadModel('button3', 4, (model) => {
   rotateModelY('button3', rotY);
   rotateModelX('button3', rotX);
   rotateModelZ('button3', rotZ);
-  enableClickMove('button3', 'z', -0.065, 'houdini.mp4');
+  enableClickMove('button3', 'z', -0.065, 'houdini.mp4','button3');
   buttonHover(targetObject);
   console.log('Загружен button');
 
@@ -954,7 +1016,7 @@ loadModel('button4', 4, (model) => {
   rotateModelY('button4', rotY);
   rotateModelX('button4', rotX);
   rotateModelZ('button4', rotZ);
-  enableClickMove('button4', 'z', -0.065, 'design.mp4');
+  enableClickMove('button4', 'z', -0.065, 'design.mp4','button4');
   buttonHover(targetObject);
   console.log('Загружен button');
 
@@ -965,7 +1027,7 @@ loadModel('button5', 4, (model) => {
   rotateModelY('button5', rotY);
   rotateModelX('button5', rotX);
   rotateModelZ('button5', rotZ);
-  enableClickMove('button5', 'z', -0.065);
+  enableClickMove('button5', 'z', -0.065,'start.mp4','button5');
 
   applyGlassMaterial(
     'button5',
@@ -985,7 +1047,7 @@ loadModel('button6', 4, (model) => {
   rotateModelY('button6', rotY);
   rotateModelX('button6', rotX);
   rotateModelZ('button6', rotZ);
-  enableClickMove('button6', 'z', -0.065);
+  enableClickMove('button6', 'z', -0.065,'start.mp4','button6');
 
   applyGlassMaterial(
     'button6',
@@ -1005,7 +1067,7 @@ loadModel('button7', 4, (model) => {
   rotateModelY('button7', rotY);
   rotateModelX('button7', rotX);
   rotateModelZ('button7', rotZ);
-  enableClickMove('button7', 'z', -0.065);
+  enableClickMove('button7', 'z', -0.065,'start.mp4','button7');
 
   applyGlassMaterial(
     'button7',
@@ -1025,7 +1087,7 @@ loadModel('button8', 4, (model) => {
   rotateModelY('button8', rotY);
   rotateModelX('button8', rotX);
   rotateModelZ('button8', rotZ);
-  enableClickMove('button8', 'z', -0.065);
+  enableClickMove('button8', 'z', -0.065,'start.mp4','button8');
 
   applyGlassMaterial(
     'button8',
@@ -1045,7 +1107,7 @@ loadModel('button9', 4, (model) => {
   rotateModelY('button9', rotY);
   rotateModelX('button9', rotX);
   rotateModelZ('button9', rotZ);
-  enableClickMove('button9', 'z', -0.065);
+  enableClickMove('button9', 'z', -0.065,'start.mp4','button9');
 
   applyGlassMaterial(
     'button9',
@@ -1065,7 +1127,7 @@ loadModel('button10', 4, (model) => {
   rotateModelY('button10', rotY);
   rotateModelX('button10', rotX);
   rotateModelZ('button10', rotZ);
-  enableClickMove('button10', 'z', -0.065);
+  enableClickMove('button10', 'z', -0.065,'start.mp4','button10');
 
   applyGlassMaterial(
     'button10',
@@ -1085,7 +1147,7 @@ loadModel('button11', 4, (model) => {
   rotateModelY('button11', rotY);
   rotateModelX('button11', rotX);
   rotateModelZ('button11', rotZ);
-  enableClickMove('button11', 'z', -0.065);
+  enableClickMove('button11', 'z', -0.065,'start.mp4','button11');
 
   applyGlassMaterial(
     'button11',
@@ -1105,7 +1167,7 @@ loadModel('button12', 4, (model) => {
   rotateModelY('button12', rotY);
   rotateModelX('button12', rotX);
   rotateModelZ('button12', rotZ);
-  enableClickMove('button12', 'z', -0.065);
+  enableClickMove('button12', 'z', -0.065,'start.mp4','button12');
 
   applyGlassMaterial(
     'button12',
