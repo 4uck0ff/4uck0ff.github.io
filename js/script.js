@@ -6,7 +6,32 @@ import {
   RGBELoader
 } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js';
 
+function hidePreloader() {
+  const preloader = document.getElementById('preloader');
+  preloader.style.opacity = '0';
+  preloader.style.transition = 'opacity 0.5s ease';
+  document.body.classList.remove('loading');
+  setTimeout(() => {
+    preloader.style.display = 'none';
+  }, 500);
+}
+// Создаем менеджер загрузки
+const manager = new THREE.LoadingManager();
 
+manager.onLoad = function () {
+  console.log('ВСЁ ЗАГРУЖЕНО!');
+  hidePreloader();
+};
+
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+  console.log(`Загружено ${itemsLoaded} из ${itemsTotal}: ${url}`);
+};
+
+
+// Загрузка моделей
+const loader = new GLTFLoader(manager);
+const textureLoader = new THREE.TextureLoader(manager);
+const rgbeLoader = new RGBELoader(manager);
 
 
 const container = document.getElementById('SceneMainContainer');
@@ -65,8 +90,6 @@ directionalLightWarm.position.set(1, 0, 1);
 directionalLightWarm.castShadow = true;
 scene.add(directionalLightWarm);
 
-// Загрузка моделей
-const loader = new GLTFLoader();
 // Храним загруженные модели по имени
 const loadedModels = {};
 
@@ -676,10 +699,6 @@ function animateRestoreEmission(object, duration = 250) {
   animate();
 }
 
-
-
-
-
 let rotX = -20;
 let rotY = -28.5;
 let rotZ = -10;
@@ -688,6 +707,8 @@ loadModel('underscreen', 4, (model) => {
   rotateModelY('underscreen', rotY);
   rotateModelX('underscreen', rotX);
   rotateModelZ('underscreen', rotZ);
+  console.log('Загружен underscreen')
+
   // модель точно загружена
 });
 
@@ -703,6 +724,8 @@ loadModel('screen', 4, (model) => {
     y: 1.05,
     z: .31
   });
+
+  console.log('Загружен screen')
   // модель точно загружена
 });
 
@@ -710,6 +733,8 @@ loadModel('body', 4, (model) => {
   rotateModelY('body', rotY);
   rotateModelX('body', rotX);
   rotateModelZ('body', rotZ);
+  console.log('Загружен body');
+
   // модель точно загружена
 });
 
@@ -731,6 +756,8 @@ loadModel('button1', 4, (model) => {
   rotateModelZ('button1', rotZ);
   enableClickMove('button1', 'z', -0.065, 'blender.mp4');
   buttonHover(targetObject, 20);
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -758,6 +785,8 @@ loadModel('button2', 4, (model) => {
     }
   });
   buttonHover(targetObject, 150);
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -779,6 +808,8 @@ loadModel('button3', 4, (model) => {
   rotateModelZ('button3', rotZ);
   enableClickMove('button3', 'z', -0.065, 'houdini.mp4');
   buttonHover(targetObject);
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -800,6 +831,8 @@ loadModel('button4', 4, (model) => {
   rotateModelZ('button4', rotZ);
   enableClickMove('button4', 'z', -0.065, 'design.mp4');
   buttonHover(targetObject);
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -818,6 +851,8 @@ loadModel('button5', 4, (model) => {
     0.1, // roughness
     0.5 // metallic
   );
+
+  console.log('Загружен button');
   // модель точно загружена
 });
 
@@ -836,6 +871,8 @@ loadModel('button6', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+
+  console.log('Загружен button');
   // модель точно загружена
 });
 
@@ -854,6 +891,8 @@ loadModel('button7', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+
+  console.log('Загружен button');
   // модель точно загружена
 });
 
@@ -872,6 +911,8 @@ loadModel('button8', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -890,6 +931,8 @@ loadModel('button9', 4, (model) => {
     0.1, // roughness
     0.5 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -908,6 +951,8 @@ loadModel('button10', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -926,6 +971,8 @@ loadModel('button11', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -944,6 +991,8 @@ loadModel('button12', 4, (model) => {
     0.2, // roughness
     0.8 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -962,6 +1011,8 @@ loadModel('text1', 4, (model) => {
     0.9, // roughness
     1 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -978,6 +1029,8 @@ loadModel('text2', 4, (model) => {
     0.9, // roughness
     1 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
 
@@ -994,5 +1047,7 @@ loadModel('text3', 4, (model) => {
     0.9, // roughness
     1 // metallic
   );
+  console.log('Загружен button');
+
   // модель точно загружена
 });
